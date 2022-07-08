@@ -19,6 +19,7 @@ commands:
     description: Sets the home co-ordinates for use with the /home command.
   tphome:
     description: Teleports the player to their home co-ordinates, for a fee.
+    aliases: [tph]
   tpspawn:
     description: Teleports the player to the world spawn coordinates, for a fee.
     aliases: [tps]

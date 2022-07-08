@@ -22,7 +22,7 @@ public class BaseCommand {
 
             Player player = (Player) requester;
 
-            if (!player.hasPermission("bananominer.setconfig")
+            if (!player.hasPermission("bananosuite.setconfig")
                     && !player.isOp()) {
 
                 SendMessage(player,"You do not have permission to use this command!", ChatColor.RED);
