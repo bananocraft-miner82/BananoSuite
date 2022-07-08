@@ -1,0 +1,40 @@
+name: BananoSuite
+version: '${project.version}'
+main: miner82.bananosuite.Main
+api-version: 1.15
+authors: [ Miner82 ]
+depend: [Vault]
+commands:
+  reloadbananosuiteconfig:
+    description: Reloads the configuration file.
+  raiseshields:
+    description: OP-only command to prevent damage.
+    aliases: [redalert,shieldsup]
+  donate:
+    description: Donates the specified amount to the server.
+  rain:
+    description: Donates the specified amount to the server.
+    aliases: [banrain,makeitrain]
+  sethome:
+    description: Sets the home co-ordinates for use with the /home command.
+  tphome:
+    description: Teleports the player to their home co-ordinates, for a fee.
+  tpspawn:
+    description: Teleports the player to the world spawn coordinates, for a fee.
+    aliases: [tps]
+  tpquote:
+    description: Provides a quote for the home or spawn teleports.
+  enabledeathinsurance:
+    description: Toggles Death insurance on/off.
+    aliases: [toggledeathpolicy]
+  startdeathinsurance:
+    description: Initiates a Death insurance policy.
+    aliases: [startdeathpolicy]
+  stopdeathinsurance:
+    description: Terminates a Death insurance policy.
+    aliases: [stopdeathpolicy]
+  quotedeathinsurance:
+    description: Provides details of what the first premium will cost.
+    aliases: [diquote]
+  pvptoggle:
+    description: Toggles PvP on/off.
