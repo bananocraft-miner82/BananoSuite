@@ -137,7 +137,7 @@ Used to provide an estimate of the first Death Insurance policy premium.
 
 - Alias[es]: `/diquote`
 
-### `/quotedeathinsurance [Inventory/Full]`
+### `/pvptoggle [PVPOFF/PVPON/QUERY]`
 
 Used to provide an estimate of the first Death Insurance policy premium.
 
@@ -148,7 +148,6 @@ Used to provide an estimate of the first Death Insurance policy premium.
 - If a player is attacked with PvP opted-out, the attacker
   will take minor damage and the player being attacked will
   not incur any damage.
-- Alias[es]: `/pvptoggle [PVPOFF/PVPON/QUERY]`
 
 ### About the permissions
 
