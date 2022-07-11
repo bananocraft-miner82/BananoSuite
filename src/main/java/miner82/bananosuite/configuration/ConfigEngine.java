@@ -31,6 +31,7 @@ public class ConfigEngine {
     private double teleportGrowthRate = 0.1;
 
     private boolean donationFireworks = true;
+    private double donationFireworksThreshold = 6.9;
     private boolean donationRandomGift = true;
 
     public ConfigEngine(Main main) {
@@ -130,6 +131,19 @@ public class ConfigEngine {
 
     public void setEnableDonationFireworks(boolean donationFireworks) {
         this.donationFireworks = donationFireworks;
+    }
+
+    public double getDonationFireworksThreshold() {
+        return this.donationFireworksThreshold;
+    }
+
+    public void setDonationFireworksThreshold(double value) {
+
+        if(value < 0) {
+            value = 0;
+        }
+
+        this.donationFireworksThreshold = value;
     }
 
     public boolean enableDonationRandomGift() {
@@ -257,6 +271,7 @@ public class ConfigEngine {
         config.set("DeathInsuranceMaximumPremium", this.deathInsuranceMaximumCost);
         config.set("DeathInsuranceGrowthRate", this.deathInsuranceGrowthRate);
         config.set("DonationGiftFireworks", this.donationFireworks);
+        config.set("DonationGiftFireworksThreshold", this.donationFireworksThreshold);
         config.set("DonationRandomGift", this.donationRandomGift);
         config.set("TeleportBasePremium", this.teleportBaseCost);
         config.set("TeleportMaximumPremium", this.teleportMaximumCost);
@@ -320,6 +335,9 @@ public class ConfigEngine {
 
             donationFireworks = configuration.getBoolean("DonationGiftFireworks");
             System.out.println("- Fireworks reward on donation: " + (donationFireworks ? "Active" : "Deactivated"));
+
+            donationFireworksThreshold = configuration.getDouble("DonationGiftFireworksThreshold");
+            System.out.println("- Fireworks reward threshold: " + this.donationFireworksThreshold);
 
             donationRandomGift = configuration.getBoolean("DonationRandomGift");
             System.out.println("- Random Gift reward on donation: " + (donationRandomGift ? "Active" : "Deactivated"));

@@ -1,7 +1,9 @@
-package miner82.bananosuite.classes;
+package miner82.bananosuite.runnables;
 
+import miner82.bananosuite.classes.PaymentCallbackParameters;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.economy.EconomyResponse;
+import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -9,7 +11,7 @@ import org.bukkit.util.Consumer;
 
 import java.util.HashMap;
 
-public class PaymentProcessor extends BukkitRunnable {
+public class TeleportChargeProcessor extends BukkitRunnable {
 
     private Economy economy;
     private Player sender;
@@ -18,11 +20,7 @@ public class PaymentProcessor extends BukkitRunnable {
     private HashMap<String,Object> parameters = new HashMap<>();
     private Consumer<PaymentCallbackParameters> callback;
 
-    public PaymentProcessor(Economy economy, Player sender, double amount, HashMap<String,Object> parameters, Consumer<PaymentCallbackParameters> callback) {
-        this(economy, sender, null, amount, parameters, callback);
-    }
-
-    public PaymentProcessor(Economy economy, Player sender, OfflinePlayer recipient, double amount, HashMap<String,Object> parameters, Consumer<PaymentCallbackParameters> callback) {
+    public TeleportChargeProcessor(Economy economy, Player sender, Location fromLocation, Location destination) {
 
         this.economy = economy;
         this.sender = sender;
@@ -40,8 +38,8 @@ public class PaymentProcessor extends BukkitRunnable {
         boolean success = false;
 
         if(economy == null
-             || sender == null
-             || amount < 0) {
+                || sender == null
+                || amount < 0) {
 
             callback.accept(new PaymentCallbackParameters(sender, recipient, amount, new EconomyResponse( amount, 0, EconomyResponse.ResponseType.FAILURE, "Invalid transaction parameters!"), parameters));
 

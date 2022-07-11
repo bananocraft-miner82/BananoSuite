@@ -4,8 +4,8 @@ import miner82.bananosuite.DB;
 import miner82.bananosuite.Main;
 import miner82.bananosuite.classes.*;
 import miner82.bananosuite.configuration.ConfigEngine;
+import miner82.bananosuite.runnables.PaymentProcessor;
 import net.milkbowl.vault.economy.Economy;
-import net.milkbowl.vault.economy.EconomyResponse;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.FireworkEffect;
@@ -96,33 +96,39 @@ public class DonateCommand extends BaseCommand implements CommandExecutor {
             boolean giftedFireworks = false;
             boolean randomGift = false;
 
-            try {
-                ItemStack star = new ItemStack(Material.FIREWORK_ROCKET, randomQuantity);
+            if(donation >= this.configEngine.getDonationFireworksThreshold()) {
 
-                FireworkEffect effect = FireworkEffect.builder().withColor(Color.YELLOW)
-                        .withTrail()
-                        .withFlicker()
-                        .withFade(Color.SILVER)
-                        .build();
+                try {
 
-                FireworkEffect effect2 = FireworkEffect.builder().withColor(Color.ORANGE)
-                        .withTrail()
-                        .withFlicker()
-                        .withFade(Color.ORANGE)
-                        .build();
+                    ItemStack star = new ItemStack(Material.FIREWORK_ROCKET, randomQuantity);
 
-                FireworkMeta metaData = (FireworkMeta) star.getItemMeta();
-                // Add effects
-                metaData.addEffect(effect);
-                metaData.addEffect(effect2);
-                metaData.setPower(2);
-                star.setItemMeta(metaData);
+                    FireworkEffect effect = FireworkEffect.builder().withColor(Color.YELLOW)
+                            .withTrail()
+                            .withFlicker()
+                            .withFade(Color.SILVER)
+                            .build();
 
-                donater.getInventory().addItem(star);
+                    FireworkEffect effect2 = FireworkEffect.builder().withColor(Color.ORANGE)
+                            .withTrail()
+                            .withFlicker()
+                            .withFade(Color.ORANGE)
+                            .build();
 
-                giftedFireworks = true;
-            } catch (Exception e) {
-                e.printStackTrace();
+                    FireworkMeta metaData = (FireworkMeta) star.getItemMeta();
+                    // Add effects
+                    metaData.addEffect(effect);
+                    metaData.addEffect(effect2);
+                    metaData.setPower(2);
+                    star.setItemMeta(metaData);
+
+                    donater.getInventory().addItem(star);
+
+                    giftedFireworks = true;
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
             }
 
             // Random prize for donating

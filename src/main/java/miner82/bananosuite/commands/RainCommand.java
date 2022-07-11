@@ -2,10 +2,9 @@ package miner82.bananosuite.commands;
 
 import miner82.bananosuite.Main;
 import miner82.bananosuite.classes.PaymentCallbackParameters;
-import miner82.bananosuite.classes.PaymentProcessor;
+import miner82.bananosuite.runnables.PaymentProcessor;
 import miner82.bananosuite.configuration.ConfigEngine;
 import miner82.bananosuite.classes.Math;
-import net.milkbowl.vault.chat.Chat;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.economy.EconomyResponse;
 import org.bukkit.*;

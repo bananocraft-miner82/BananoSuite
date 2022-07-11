@@ -124,7 +124,7 @@ public class SpawnTeleportCommand extends BaseCommand implements CommandExecutor
                                 }
 
                                 player.setVelocity(new Vector(0,0,0));
-                                player.teleport(destination, PlayerTeleportEvent.TeleportCause.PLUGIN);
+                                player.teleport(destination, PlayerTeleportEvent.TeleportCause.COMMAND);
 
                                 player.setGravity(true);
 
