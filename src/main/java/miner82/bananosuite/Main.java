@@ -3,6 +3,7 @@ package miner82.bananosuite;
 import miner82.bananosuite.commands.*;
 import miner82.bananosuite.configuration.ConfigEngine;
 import miner82.bananosuite.events.*;
+import miner82.bananosuite.io.FileManager;
 import miner82.bananosuite.tabcompleters.*;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
@@ -22,11 +23,16 @@ public final class Main extends JavaPlugin {
 
         this.configEngine = new ConfigEngine(this);
 
+        InitialiseImageDirectories();
+
         // Plugin startup logic
         Bukkit.getPluginManager().registerEvents(new OnPlayerJoinEvent(), this);
         Bukkit.getPluginManager().registerEvents(new OnPlayerLeaveEvent(), this);
         Bukkit.getPluginManager().registerEvents(new OnOPDamageEvent(), this);
         Bukkit.getPluginManager().registerEvents(new OnPlayerDamageEvent(), this);
+        Bukkit.getPluginManager().registerEvents(new InventoryMapCloneEvent(this.configEngine), this);
+        Bukkit.getPluginManager().registerEvents(new MapCloneEvent(this.configEngine), this);
+        Bukkit.getPluginManager().registerEvents(new MonkeyMapInitialiseEvent(this.configEngine), this);
 
         getCommand("reloadbananosuiteconfig").setExecutor(new ReloadConfigurationCommand(this.configEngine));
         getCommand("raiseshields").setExecutor(new RaiseShieldsCommand(this.configEngine));
@@ -92,16 +98,23 @@ public final class Main extends JavaPlugin {
         getCommand("tpquote").setExecutor(new TeleportQuoteCommand(this.configEngine, this.econ));
         getCommand("startdeathinsurance").setExecutor(new StartDeathInsuranceCommand(this.configEngine, this.econ));
         getCommand("quotedeathinsurance").setExecutor(new QuoteDeathInsuranceCommand(this.configEngine, this.econ));
+        getCommand("buymonkeymap").setExecutor(new MonKeyMapCommand(this.configEngine, econ));
 
         getCommand("quotedeathinsurance").setTabCompleter(new QuoteDeathInsuranceCommandTabCompleter());
         getCommand("startdeathinsurance").setTabCompleter(new StartDeathInsuranceCommandTabCompleter());
         getCommand("tpquote").setTabCompleter(new TeleportQuoteCommandTabCompleter());
         getCommand("tphome").setTabCompleter(new DirectTeleportCommandTabCompleter());
         getCommand("tpspawn").setTabCompleter(new DirectTeleportCommandTabCompleter());
+        getCommand("buymonkeymap").setTabCompleter(new MonKeyMapTabCompleter(this.configEngine));
 
         Bukkit.getPluginManager().registerEvents(new OnPlayerDeathEvent(this.configEngine, this.econ), this);
         //Bukkit.getPluginManager().registerEvents(new OnBlockMined(this.configEngine, this.econ), this);
 
         return true;
+    }
+
+    private void InitialiseImageDirectories() {
+        FileManager.MakeDirectories(this.configEngine.getAbsoluteQRDirectoryPath());
+        FileManager.MakeDirectories(this.configEngine.getAbsoluteMonKeyDirectoryPath());
     }
 }

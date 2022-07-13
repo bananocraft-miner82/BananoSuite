@@ -1,7 +1,6 @@
 package miner82.bananosuite.classes;
 
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 

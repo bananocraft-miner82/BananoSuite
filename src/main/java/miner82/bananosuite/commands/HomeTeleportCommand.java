@@ -5,7 +5,6 @@ import miner82.bananosuite.classes.DistanceCalculator;
 import miner82.bananosuite.classes.TeleportLocationMaker;
 import miner82.bananosuite.classes.TeleportPremiumCalculator;
 import miner82.bananosuite.configuration.ConfigEngine;
-import net.milkbowl.vault.chat.Chat;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.economy.EconomyResponse;
 import org.bukkit.*;

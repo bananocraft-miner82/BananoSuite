@@ -2,11 +2,13 @@ package miner82.bananosuite.configuration;
 
 import miner82.bananosuite.Main;
 import miner82.bananosuite.classes.DonationPrize;
+import miner82.bananosuite.classes.MonKeyType;
 import miner82.bananosuite.classes.PrizeClassification;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 
+import java.io.File;
 import java.util.*;
 
 public class ConfigEngine {
@@ -33,6 +35,17 @@ public class ConfigEngine {
     private boolean donationFireworks = true;
     private double donationFireworksThreshold = 6.9;
     private boolean donationRandomGift = true;
+
+    private String mongoURI = "";
+    private String monKeyImageSourceURL = "https://monkey.banano.cc/api/v1/monkey/{address}?format=png&size=128&background=true";
+
+    private String imageDirectory = "images";
+    private String qrDirectory = "maps";
+
+    private String applyFrame = "";
+    private boolean allowCloning = false;
+    private double monKeyPrice = 100;
+    private double qrPrice = 250;
 
     public ConfigEngine(Main main) {
 
@@ -152,6 +165,110 @@ public class ConfigEngine {
 
     public void setEnableDonationRandomGift(boolean donationRandomGift) {
         this.donationRandomGift = donationRandomGift;
+    }
+
+    public String getImageDirectory() {
+        return this.imageDirectory;
+    }
+
+    public String getAbsoluteMonKeyDirectoryPath() {
+        String path = main.getDataFolder().getAbsolutePath();
+
+        if(!path.endsWith(File.separator)) {
+            path += File.separator;
+        }
+
+        path += this.imageDirectory + File.separator;
+
+        return path;
+    }
+
+    public String getAbsoluteDataDirectoryPath() {
+        String path = main.getDataFolder().getAbsolutePath();
+
+        if(!path.endsWith(File.separator)) {
+            path += File.separator;
+        }
+
+        return path;
+    }
+
+    public String getQRDirectory() {
+        return this.qrDirectory;
+    }
+
+    public String getAbsoluteQRDirectoryPath() {
+        String path = main.getDataFolder().getAbsolutePath();
+
+        if(!path.endsWith(File.separator)) {
+            path += File.separator;
+        }
+
+        path += this.qrDirectory + File.separator;
+
+        return path;
+    }
+
+    public String getAbsoluteDataDirectoryPath(MonKeyType type) {
+        if(type == MonKeyType.MonKey) {
+            return this.getAbsoluteMonKeyDirectoryPath();
+        }
+        else {
+            return this.getAbsoluteQRDirectoryPath();
+        }
+    }
+
+    public String getApplyFrame() {
+        return this.applyFrame;
+    }
+
+    public void setApplyFrame(String newValue) {
+        this.applyFrame = newValue;
+    }
+
+    public boolean getAllowCloning() {
+        return this.allowCloning;
+    }
+
+    public void setAllowCloning(boolean newValue) {
+        this.allowCloning = newValue;
+    }
+
+    public double getMapPrice(MonKeyType mapType) {
+        if(mapType == MonKeyType.MonKey) {
+            return getMonKeyPrice();
+        }
+        else {
+            return getQrPrice();
+        }
+    }
+
+    public double getMonKeyPrice() {
+        return monKeyPrice;
+    }
+
+    public void setMonKeyPrice(double monKeyPrice) {
+        this.monKeyPrice = monKeyPrice;
+    }
+
+    public double getQrPrice() {
+        return qrPrice;
+    }
+
+    public void setQrPrice(double qrPrice) {
+        this.qrPrice = qrPrice;
+    }
+
+    public String getMonKeyImageSourceURL() {
+        return monKeyImageSourceURL;
+    }
+
+    public String getMonKeyImageSourceURL(String banAddress) {
+        return monKeyImageSourceURL.replace("{address}", banAddress);
+    }
+
+    public void setMonKeyImageSourceURL(String monKeyImageSourceURL) {
+        this.monKeyImageSourceURL = monKeyImageSourceURL;
     }
 
     private void loadDonationPrizes() {
@@ -276,6 +393,15 @@ public class ConfigEngine {
         config.set("TeleportBasePremium", this.teleportBaseCost);
         config.set("TeleportMaximumPremium", this.teleportMaximumCost);
         config.set("TeleportGrowthRate", this.teleportGrowthRate);
+        config.set("mongoURI", this.imageDirectory);
+        config.set("monKeyImageSourceURL", this.monKeyImageSourceURL);
+
+        config.set("ApplyFrame", this.applyFrame);
+        config.set("AllowCloning", this.allowCloning);
+        config.set("MonKeyPrice", this.monKeyPrice);
+        config.set("QRPrice", this.qrPrice);
+
+
         this.main.saveConfig();
 
         return true;
@@ -341,6 +467,27 @@ public class ConfigEngine {
 
             donationRandomGift = configuration.getBoolean("DonationRandomGift");
             System.out.println("- Random Gift reward on donation: " + (donationRandomGift ? "Active" : "Deactivated"));
+
+            this.monKeyImageSourceURL = configuration.getString("monKeyImageSourceURL");
+            System.out.println("MonKey Image Source URL: " + this.monKeyImageSourceURL);
+
+            this.imageDirectory = configuration.getString("ImageDirectory");
+            System.out.println("Registered Image Directory: " + this.imageDirectory);
+
+            this.qrDirectory = configuration.getString("QRDirectory");
+            System.out.println("Registered QR Directory: " + this.qrDirectory);
+
+            this.applyFrame = configuration.getString("ApplyFrame");
+            System.out.println("Frame Enabled: " + this.applyFrame);
+
+            this.allowCloning = configuration.getBoolean("AllowCloning");
+            System.out.println("Map Cloning Enabled: " + this.allowCloning);
+
+            this.monKeyPrice = configuration.getDouble("MonKeyPrice");
+            System.out.println("MonKey Map Price: " + this.monKeyPrice);
+
+            this.qrPrice = configuration.getDouble("QRPrice");
+            System.out.println("QR Map Price: " + this.qrPrice);
 
             loadDonationPrizes();
 

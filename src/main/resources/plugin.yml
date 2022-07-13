@@ -39,3 +39,5 @@ commands:
     aliases: [diquote]
   pvptoggle:
     description: Toggles PvP on/off.
+  buymonkeymap:
+    description: Provides the ability to buy a map displaying the monKey or QR code for your Banano address.

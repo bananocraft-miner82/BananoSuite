@@ -1,10 +1,8 @@
 package miner82.bananosuite;
 
-import com.mongodb.BasicDBObject;
 import com.mongodb.client.*;
-import com.mongodb.client.result.UpdateResult;
-import miner82.bananosuite.classes.DeathInsuranceOption;
-import miner82.bananosuite.classes.PlayerSuiteOption;
+import miner82.bananosuite.classes.*;
+import miner82.bananosuite.configuration.ConfigEngine;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.bukkit.Bukkit;
@@ -12,6 +10,7 @@ import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
+import org.bukkit.map.MapView;
 import org.bukkit.plugin.Plugin;
 
 import java.net.URI;
@@ -28,21 +27,14 @@ public class DB {
     static Plugin plugin = Main.getPlugin(Main.class);
     private static MongoClient mongoClient = MongoClients.create(getMongoURI());
     private static MongoDatabase db = mongoClient.getDatabase("BananoSuite");
-    //public static MongoCollection<Document> usersCollection =
-    //        mongoClient.getDatabase("BananoSuite").getCollection("users");
-    //public static MongoCollection<Document> deathsCollection =
-    //        mongoClient.getDatabase("BananoSuite").getCollection("deathpolicyuses");
 
     public static String getMongoURI() {
         return plugin.getConfig().getString("mongoURI");
     }
 
-    public static MongoClient getMongoClient() {
-        return mongoClient;
-    }
-
     private static HashMap<String, PlayerSuiteOption> playerOptions = new HashMap<String, PlayerSuiteOption>(); // player uuid, insurance level
 
+    public static MonKeyMaps maps = new MonKeyMaps();
 
     private static URI getURI() throws Exception {
         return new URI(plugin.getConfig().getString("mongoURI"));
@@ -301,6 +293,86 @@ public class DB {
         }
 
         return playerOptions.get(playerUUID).isCitizen();
+
+    }
+
+    public static boolean isBananoMap(MapView map) {
+
+        if(map != null) {
+
+            FindIterable<Document> documents = db.getCollection("maps")
+                                                 .find(eq("_id", map.getId()));
+
+            return documents.first() != null;
+
+        }
+
+        return false;
+    }
+
+    public static boolean createMapRecord(MapView map, Player owner, MonKeyType mapType, String imageFileName) {
+
+        if(map != null) {
+
+            if (maps.containsKey(map.getId())) {
+                return true;
+            }
+
+            Document document1 = new Document("_id", map.getId())
+                    .append("owneruuid", owner.getUniqueId().toString())
+                    .append("ownername", owner.getName())
+                    .append("created", System.currentTimeMillis())
+                    .append("type", mapType.toString())
+                    .append("filename", imageFileName);
+
+            db.getCollection("maps").insertOne(document1);
+
+            return true;
+
+        }
+
+        return false;
+
+    }
+
+    public static MonkeyMap getMapRecord(ConfigEngine configEngine, MapView map) {
+
+        if(map != null) {
+
+            if(maps.containsKey(map.getId())) {
+                return maps.get(map.getId());
+            }
+
+            FindIterable<Document> documents = db.getCollection("maps").find(eq("_id", map.getId()));
+
+            Document document = documents.first();
+
+            if(document != null) {
+
+                UUID id = UUID.fromString(document.getString("owneruuid"));
+
+                Player player = Bukkit.getPlayer(id);
+
+                if(player == null) {
+
+                    player = Bukkit.getOfflinePlayer(id).getPlayer();
+
+                }
+
+                MonKeyType mapType = MonKeyType.valueOf(document.getString("type"));
+                String fileName = document.getString("filename");
+
+                MonkeyMap monkeyMap = new MonkeyMap(map.getId(), player, mapType, fileName, configEngine.getAbsoluteDataDirectoryPath(mapType) + fileName);
+
+                maps.put(map.getId(), monkeyMap);
+
+                return monkeyMap;
+
+            }
+
+        }
+
+        return null;
 
     }
 

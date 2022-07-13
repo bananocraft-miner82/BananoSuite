@@ -1,12 +1,10 @@
 package miner82.bananosuite.events;
 
-import miner82.bananosuite.DB;
 import miner82.bananosuite.classes.TeleportPremiumCalculator;
 import miner82.bananosuite.configuration.ConfigEngine;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 
 
@@ -21,15 +19,15 @@ public class OnPlayerTeleportEvent implements Listener {
     @EventHandler
     public void onPlayerTeleport(PlayerTeleportEvent event){
 
-        Player player = event.getPlayer();
+        //Player player = event.getPlayer();
 
-        if(event.getCause() == PlayerTeleportEvent.TeleportCause.COMMAND
-             && !player.isOp()) {
+        //if(event.getCause() == PlayerTeleportEvent.TeleportCause.COMMAND
+        //     && !player.isOp()) {
 
-            double teleportCost = TeleportPremiumCalculator.calculateTeleportCost(this.configEngine, event.getFrom(), event.getTo());
+        //    double teleportCost = TeleportPremiumCalculator.calculateTeleportCost(this.configEngine, event.getFrom(), event.getTo());
 
 
-        }
+        //}
 
     }
 

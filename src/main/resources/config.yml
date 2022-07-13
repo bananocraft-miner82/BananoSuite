@@ -17,6 +17,17 @@ DeathInsuranceBasePremium: 19
 DeathInsuranceMaximumPremium: 1900
 DeathInsuranceGrowthRate: 0.19
 
+# MonKey/QR Map Configuration
+monKeyImageSourceURL: https://monkey.banano.cc/api/v1/monkey/{address}?format=png&size=128&background=true
+
+ImageDirectory: "images"
+QRDirectory: "qrcodes"
+
+ApplyFrame: "frame.png"
+AllowCloning: false
+MonKeyPrice: 100
+QRPrice: 250
+
 #Donation Command Configuration
 DonationGiftFireworks: true
 DonationGiftFireworksThreshold: 6.9

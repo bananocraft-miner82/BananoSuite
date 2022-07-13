@@ -1,7 +1,6 @@
 package miner82.bananosuite.commands;
 
 import miner82.bananosuite.classes.DistanceCalculator;
-import miner82.bananosuite.classes.PaymentCallbackParameters;
 import miner82.bananosuite.classes.TeleportLocationMaker;
 import miner82.bananosuite.classes.TeleportPremiumCalculator;
 import miner82.bananosuite.configuration.ConfigEngine;

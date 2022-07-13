@@ -1,6 +1,5 @@
 package miner82.bananosuite.tabcompleters;
 
-import miner82.bananosuite.configuration.ConfigEngine;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
