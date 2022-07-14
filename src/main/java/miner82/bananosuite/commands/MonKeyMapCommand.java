@@ -11,7 +11,6 @@ import net.milkbowl.vault.economy.EconomyResponse;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -29,7 +28,11 @@ import java.io.IOException;
 import java.util.Locale;
 
 
-public class MonKeyMapCommand implements CommandExecutor {
+public class MonKeyMapCommand extends BaseCommand implements CommandExecutor {
+
+    private final String WALLET_ADDRESS = "WalletAddress";
+    private final String MAP_TYPE = "MapType";
+    private final String INCLUDE_FRAME = "IncludeFrame";
 
     private ConfigEngine configEngine;
     private Economy econ;
@@ -56,15 +59,23 @@ public class MonKeyMapCommand implements CommandExecutor {
 
                     MonKeyType mapType = args[0].equalsIgnoreCase("qrcode") ? MonKeyType.QRCode : MonKeyType.MonKey;
                     String address = args[1].toLowerCase(Locale.ROOT).trim();
+                    String frameKey = "";
+
+                    if(mapType == MonKeyType.MonKey
+                            && args.length >= 3
+                            && !args[2].equalsIgnoreCase("none")) {
+
+                        frameKey = args[2];
+
+                    }
 
                     // Process the payment
                     double requiredPayment = this.configEngine.getMapPrice(mapType);
-                    OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(player.getUniqueId());
 
                     if(requiredPayment > 0
-                          && !econ.has(offlinePlayer, requiredPayment)) {
+                          && !econ.has(player, requiredPayment)) {
 
-                        player.sendMessage(ChatColor.RED + "You do not have sufficient funds for this purchase! You need " + requiredPayment + " " + econ.currencyNamePlural() + " and you have " + econ.getBalance(offlinePlayer) + " " + econ.currencyNamePlural() + ".");
+                        player.sendMessage(ChatColor.RED + "You do not have sufficient funds for this purchase! You need " + econ.format(requiredPayment) + " and you have " + econ.format(econ.getBalance(player)) + ".");
                         return false;
 
                     }
@@ -101,26 +112,23 @@ public class MonKeyMapCommand implements CommandExecutor {
 
                             image = ImageManager.resizeImage(ImageIO.read(outputFile), 128, 128);
 
-                            boolean applyFrame = true;
-
-                            if(args.length >= 3
-                                && args[2].equalsIgnoreCase("noframe")) {
-
-                                applyFrame = false;
-
-                            }
-
-                            if(applyFrame
-                                 && this.configEngine.getApplyFrame().length() > 0) {
+                            if(this.configEngine.getAvailableFrames().containsKey(frameKey)) {
 
                                 try {
-                                    File frameFile = new File(this.configEngine.getAbsoluteDataDirectoryPath() + this.configEngine.getApplyFrame());
-                                    BufferedImage frame = ImageIO.read(frameFile);
+                                    String frameImageFileName =  this.configEngine.getAvailableFrames().getOrDefault(frameKey, "");
 
-                                    Graphics g = image.getGraphics();
-                                    g.drawImage(frame, 0, 0, null);
+                                    if(frameImageFileName != "") {
+
+                                        File frameFile = new File(this.configEngine.getMonKeyFrameDirectoryPath() + frameImageFileName);
+                                        BufferedImage frame = ImageIO.read(frameFile);
+
+                                        Graphics g = image.getGraphics();
+                                        g.drawImage(frame, 0, 0, null);
+
+                                    }
+
                                 } catch (Exception ex) {
-
+                                    ex.printStackTrace();
                                 }
 
                             }
@@ -155,7 +163,7 @@ public class MonKeyMapCommand implements CommandExecutor {
                     if(requiredPayment > 0) {
 
                         try {
-                            EconomyResponse response = econ.withdrawPlayer(offlinePlayer, requiredPayment);
+                            EconomyResponse response = econ.withdrawPlayer(player, requiredPayment);
 
                             if(response != null
                                  && response.transactionSuccess()) {

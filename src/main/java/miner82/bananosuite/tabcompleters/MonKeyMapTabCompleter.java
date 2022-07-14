@@ -33,8 +33,14 @@ public class MonKeyMapTabCompleter implements TabCompleter {
                  && args[0].equalsIgnoreCase(MonKeyType.MonKey.toString())
                  && this.configEngine.getApplyFrame().length() > 0) {
 
-            results.add("frame");
-            results.add("noframe");
+            results.add("none");
+
+            for(String key : this.configEngine.getAvailableFrames().keySet()) {
+
+                results.add(key);
+
+            }
+
 
         }
 

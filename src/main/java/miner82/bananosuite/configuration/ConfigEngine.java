@@ -17,6 +17,7 @@ public class ConfigEngine {
 
     private List<PrizeClassification> prizeClassifications = new ArrayList<PrizeClassification>();
     private HashMap<PrizeClassification,List<DonationPrize>> donationPrizes = new HashMap<>();
+    private HashMap<String,String> availableFrames = new HashMap<>();
 
     private boolean enablePlugin = true;
 
@@ -41,6 +42,7 @@ public class ConfigEngine {
 
     private String imageDirectory = "images";
     private String qrDirectory = "maps";
+    private String frameDirectory = "frames";
 
     private String applyFrame = "";
     private boolean allowCloning = false;
@@ -171,6 +173,18 @@ public class ConfigEngine {
         return this.imageDirectory;
     }
 
+    public String getMonKeyFrameDirectoryPath() {
+        String path = main.getDataFolder().getAbsolutePath();
+
+        if(!path.endsWith(File.separator)) {
+            path += File.separator;
+        }
+
+        path += this.frameDirectory + File.separator;
+
+        return path;
+    }
+
     public String getAbsoluteMonKeyDirectoryPath() {
         String path = main.getDataFolder().getAbsolutePath();
 
@@ -222,6 +236,8 @@ public class ConfigEngine {
         return this.applyFrame;
     }
 
+    public HashMap<String, String> getAvailableFrames() { return this.availableFrames; }
+
     public void setApplyFrame(String newValue) {
         this.applyFrame = newValue;
     }
@@ -269,6 +285,58 @@ public class ConfigEngine {
 
     public void setMonKeyImageSourceURL(String monKeyImageSourceURL) {
         this.monKeyImageSourceURL = monKeyImageSourceURL;
+    }
+
+    private void loadFrames() {
+
+        FileConfiguration configuration = main.getConfig();
+
+        System.out.println("Loading Available MonKey Frames...");
+
+        availableFrames.clear();
+
+        if (configuration.contains("AvailableFrames")) {
+
+            System.out.println("- AvailableFrames section found...");
+
+            ConfigurationSection frames = configuration.getConfigurationSection("AvailableFrames");
+
+            if (frames != null) {
+
+                System.out.println("- Attempting to load frames...");
+
+                for (String key : frames.getKeys(false)) {
+
+                    System.out.println("- Frame Key identified: " + key);
+
+                    if (frames.isConfigurationSection(key)) {
+
+                        try {
+
+                            ConfigurationSection section = frames.getConfigurationSection(key);
+
+                            String imageFileName = section.getString("Image");
+
+                            availableFrames.put(key, imageFileName);
+
+                            System.out.println("Loaded frame: [" + key + "] Image: " + imageFileName);
+
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+
+                    }
+
+                }
+
+            } else {
+                System.out.println("- Failed loading frames!");
+            }
+
+        } else {
+            System.out.println("- No frames configured.");
+        }
+
     }
 
     private void loadDonationPrizes() {
@@ -490,6 +558,7 @@ public class ConfigEngine {
             System.out.println("QR Map Price: " + this.qrPrice);
 
             loadDonationPrizes();
+            loadFrames();
 
         }
         else {
