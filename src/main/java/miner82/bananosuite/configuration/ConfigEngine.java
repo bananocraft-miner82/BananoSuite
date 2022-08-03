@@ -32,6 +32,7 @@ public class ConfigEngine {
     private double teleportBaseCost = 10;
     private double teleportMaximumCost = 1000;
     private double teleportGrowthRate = 0.1;
+    private int minimumTeleportDistance = 16;
 
     private boolean donationFireworks = true;
     private double donationFireworksThreshold = 6.9;
@@ -131,6 +132,14 @@ public class ConfigEngine {
     public double getTeleportGrowthRate() { return this.teleportGrowthRate; }
 
     public void setTeleportGrowthRate(double value) { this.teleportGrowthRate = value; }
+
+    public int getMinimumTeleportDistance() {
+        return this.minimumTeleportDistance;
+    }
+
+    public void setMinimumTeleportDistance(int distance) {
+        this.minimumTeleportDistance = distance;
+    }
 
     public List<PrizeClassification> getPrizeClassifications() {
         return prizeClassifications;
@@ -461,6 +470,7 @@ public class ConfigEngine {
         config.set("TeleportBasePremium", this.teleportBaseCost);
         config.set("TeleportMaximumPremium", this.teleportMaximumCost);
         config.set("TeleportGrowthRate", this.teleportGrowthRate);
+        config.set("MinimumTeleportDistance", this.minimumTeleportDistance);
         config.set("mongoURI", this.imageDirectory);
         config.set("monKeyImageSourceURL", this.monKeyImageSourceURL);
 
@@ -517,6 +527,9 @@ public class ConfigEngine {
 
             teleportGrowthRate = configuration.getDouble("TeleportGrowthRate");
             System.out.println("- Teleport Cost Growth Rate: " + teleportGrowthRate);
+
+            minimumTeleportDistance = configuration.getInt("MinimumTeleportDistance");
+            System.out.println("- Teleport Minimum Distance: " + minimumTeleportDistance);
 
             baseDeathInsurancePremium = configuration.getDouble("DeathInsuranceBasePremium");
             System.out.println("- Death Insurance Base Premium: " + baseDeathInsurancePremium);

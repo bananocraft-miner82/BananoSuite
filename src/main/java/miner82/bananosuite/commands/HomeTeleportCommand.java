@@ -68,9 +68,10 @@ public class HomeTeleportCommand extends BaseCommand implements CommandExecutor 
 
                 Location currentLocation = player.getLocation();
 
+                int minimumDistance = this.configEngine.getMinimumTeleportDistance();
                 double distance = DistanceCalculator.calculateDistance(currentLocation, destination);
 
-                if(distance > 0) {
+                if(distance > minimumDistance) {
 
                     double teleportCost = TeleportPremiumCalculator.calculateTeleportCost(this.configEngine, currentLocation, destination);
 
@@ -127,6 +128,11 @@ public class HomeTeleportCommand extends BaseCommand implements CommandExecutor 
                         SendMessage( player, "Oops, something went wrong! Please contact an Op if you have been charged for this transaction but not teleported to home.", ChatColor.RED);
 
                     }
+
+                }
+                else {
+
+                    SendMessage( player, "Teleporting over such a small distance is not allowed. Why not walk?", ChatColor.RED);
 
                 }
 
