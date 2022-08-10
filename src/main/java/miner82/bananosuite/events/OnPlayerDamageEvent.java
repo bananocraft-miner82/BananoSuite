@@ -22,19 +22,15 @@ public class OnPlayerDamageEvent implements Listener {
                 damager = args.getDamager();
 
             }
-            else if(args.getDamager().getType() == EntityType.ARROW) {
+            else if(args.getDamager() instanceof Projectile) {
 
-                Projectile arrow = (Arrow) args.getDamager();
-                if(arrow.getShooter() instanceof Entity) {
+                Projectile projectile = (Projectile) args.getDamager();
 
-                    damager = (Entity) arrow.getShooter();
+                if(projectile.getShooter() instanceof Player) {
+
+                    damager = (Player) projectile.getShooter();
 
                 }
-
-            } else if (args.getDamager().getType() == EntityType.SPLASH_POTION) {
-
-                Projectile potion = (ThrownPotion) args.getDamager();
-                damager = (Entity) potion.getShooter();
 
             }
 
@@ -45,14 +41,25 @@ public class OnPlayerDamageEvent implements Listener {
                 Player taker = (Player) args.getEntity();
                 Player damagerPlayer = (Player) args.getDamager();
 
-                if (!DB.getPlayerPvPOptIn(taker)
+                boolean takerOptedOut = !DB.getPlayerPvPOptIn(taker);
+                boolean damagerOptedOut = !DB.getPlayerPvPOptIn(damagerPlayer);
+
+                if ((takerOptedOut || damagerOptedOut)
                         && !taker.equals(damagerPlayer)) {
 
-                    args.setDamage(0);
+                    args.setCancelled(true);
 
-                    damagerPlayer.damage(1, damagerPlayer);
-                    damagerPlayer.sendMessage(ChatColor.LIGHT_PURPLE + "This player has opted-out for PvP!");
+                    if(takerOptedOut) {
 
+                        damagerPlayer.sendMessage(ChatColor.LIGHT_PURPLE + "This player has opted-out for PvP!");
+
+                    }
+
+                    if(damagerOptedOut) {
+
+                        damagerPlayer.sendMessage(ChatColor.LIGHT_PURPLE + "You are opted-out for PvP!");
+
+                    }
                 }
 
             }

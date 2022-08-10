@@ -91,6 +91,8 @@ public final class Main extends JavaPlugin {
         }
 
         // Plugin startup logic
+        getCommand("help").setExecutor(new HelpCommand());
+
         getCommand("donate").setExecutor(new DonateCommand(this.configEngine, this.econ));
         getCommand("rain").setExecutor(new RainCommand(this.configEngine, this.econ));
         getCommand("tphome").setExecutor(new HomeTeleportCommand(this.configEngine, this.econ));

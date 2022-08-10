@@ -14,7 +14,7 @@ commands:
     description: Donates the specified amount to the server.
   rain:
     description: Donates the specified amount to the server.
-    aliases: [banrain,makeitrain]
+    aliases: [makeitrain]
   sethome:
     description: Sets the home co-ordinates for use with the /home command.
   tphome:
@@ -41,3 +41,5 @@ commands:
     description: Toggles PvP on/off.
   buymonkeymap:
     description: Provides the ability to buy a map displaying the monKey or QR code for your Banano address.
+  help:
+    description: Displays a list of commands and possible parameters.

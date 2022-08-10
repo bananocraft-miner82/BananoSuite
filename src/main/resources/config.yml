@@ -5,6 +5,9 @@ EnableBananoSuite: true
 # Home Command Configuration
 RestrictHomeToOverworld: true
 
+# Rain Command Configuration
+MinimumRainPerPlayer: 0.1
+
 # Spawn Teleport Configuration
 FreeSpawnTeleport: false
 TeleportBasePremium: 1.9

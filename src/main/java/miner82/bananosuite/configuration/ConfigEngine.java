@@ -21,6 +21,8 @@ public class ConfigEngine {
 
     private boolean enablePlugin = true;
 
+    private double minimumRainPerPlayer = 0.1;
+
     private boolean restrictHomeToOverworld = true;
     private boolean isSpawnTeleportFree = false;
 
@@ -64,6 +66,16 @@ public class ConfigEngine {
 
     public void setIsEnabled(boolean enable) {
         this.enablePlugin = enable;
+    }
+
+    public double getMinimumRainPerPlayer() {
+        return this.minimumRainPerPlayer;
+    }
+
+    public void setMinimumRainPerPlayer(double value) {
+        if(value > 0) {
+            this.minimumRainPerPlayer = value;
+        }
     }
 
     public boolean getRestrictHomeToOverworld() {
@@ -473,6 +485,7 @@ public class ConfigEngine {
         config.set("MinimumTeleportDistance", this.minimumTeleportDistance);
         config.set("mongoURI", this.imageDirectory);
         config.set("monKeyImageSourceURL", this.monKeyImageSourceURL);
+        config.set("MinimumRainPerPlayer", this.minimumRainPerPlayer);
 
         config.set("ApplyFrame", this.applyFrame);
         config.set("AllowCloning", this.allowCloning);
@@ -509,6 +522,9 @@ public class ConfigEngine {
             }
 
             setIsEnabled(true);
+
+            minimumRainPerPlayer = configuration.getDouble("MinimumRainPerPlayer");
+            System.out.println("- Minimum Rain Per Player: " + this.minimumRainPerPlayer);
 
             enableDeathInsurance = configuration.getBoolean("EnableDeathInsurance");
             System.out.println("- Death Insurance: " + (enableDeathInsurance ? "Active" : "Deactivated"));

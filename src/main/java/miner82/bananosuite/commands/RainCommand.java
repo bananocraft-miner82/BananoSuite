@@ -14,6 +14,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Random;
 
@@ -51,7 +52,7 @@ public class RainCommand extends BaseCommand implements CommandExecutor {
         // Process the rain!
         try {
             final double rainAmount = Double.parseDouble(args[0]);
-            Object[] onlinePlayers = Bukkit.getOnlinePlayers().toArray();
+            Object[] onlinePlayers = Bukkit.getOnlinePlayers().stream().filter(x -> !x.equals(player)).toArray();
             int playersOnline = Bukkit.getOnlinePlayers().size() - 1; // Exclude the sender!
             boolean testmode = false;
 
@@ -84,9 +85,9 @@ public class RainCommand extends BaseCommand implements CommandExecutor {
 
             }
             else if(!testmode
-                     && (rainAmount / (double)playersOnline) < 0.01) {
+                     && (rainAmount / (double)playersOnline) < this.configEngine.getMinimumRainPerPlayer()) {
 
-                SendMessage( player, "The rain amount must be greater than " + econ.format(0.01) + " per player! There are currently " + playersOnline + " other players online.", ChatColor.RED);
+                SendMessage( player, "The rain amount must be greater than " + econ.format(this.configEngine.getMinimumRainPerPlayer()) + " per player! There are currently " + playersOnline + " other players online.", ChatColor.RED);
 
                 return false;
 
@@ -102,6 +103,8 @@ public class RainCommand extends BaseCommand implements CommandExecutor {
 
                 new PaymentProcessor(econ, player, totalRain, params, this::RainCallback)
                         .runTaskAsynchronously(Main.getPlugin(Main.class));
+
+                TriggerWeather();
 
             }
             else {
@@ -171,8 +174,6 @@ public class RainCommand extends BaseCommand implements CommandExecutor {
 
                 SendMessage( player, "Thank you for your rain of " + econ.format(totalRain) + ".", ChatColor.GREEN);
                 SendMessage( player, "This will be shared out as " + econ.format(rainPerPlayer) + " for each online player!", ChatColor.GREEN);
-
-                TriggerWeather();
 
                 for (Object recipient : recipients) {
 
