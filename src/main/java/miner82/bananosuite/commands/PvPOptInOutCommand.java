@@ -32,6 +32,15 @@ public class PvPOptInOutCommand extends BaseCommand implements CommandExecutor {
 
         }
 
+        if(!this.configEngine.getIsEnabled()
+                || !this.configEngine.getPvpToggleEnabled()) {
+
+            SendMessage(player, "That command is not enabled on this server.", ChatColor.GOLD);
+
+            return false;
+
+        }
+
         if(args.length != 1) {
 
             SendMessage(player, "Incorrect arguments. Expected 1, received " + args.length, ChatColor.RED);

@@ -56,7 +56,20 @@ Used to set player's home coordinates for use with the `/tphome` command.
   set when the plugin was first activated.
 - The coordinates must be in the Overworld.
 
-### `/tphome [Optional:QUOTE]`
+### `/teleport [HOME/SPAWN] [Optional:QUOTE]`
+
+Used to teleport the player to their previously defined home coordinates.
+
+- The player will be teleported to their home or spawn coordinates, for a fee.
+- The further the teleport, the greater the fee, between a base specified amount and a
+  maximum, specified in the configuration file.
+- Adding the QUOTE parameter will provide the cost of the teleport
+  from the player's current location. No teleport will occur and no
+  funds will be deducted from the player's balance when passing the
+  QUOTE parameter.
+- Alias[es] `/tp`
+
+### `/home [Optional:QUOTE]`
 
 Used to teleport the player to their previously defined home coordinates.
 
@@ -69,7 +82,7 @@ Used to teleport the player to their previously defined home coordinates.
   QUOTE parameter.
 - Alias[es] `/tph`
 
-### `/tpspawn [Optional:QUOTE]`
+### `/spawn [Optional:QUOTE]`
 
 Used to teleport the player to the world spawn coordinates.
 
@@ -82,21 +95,6 @@ Used to teleport the player to the world spawn coordinates.
   QUOTE parameter.
 - Alias[es] `/tps`
 
-tpquote:
-description: Provides a quote for the home or spawn teleports.
-
-
-### `/tpquote [HOME/SPAWN]`
-
-Used to provide a quote to the player to identify the cost of the teleport to the requested location.
-
-- Sending 'HOME' will provide a quote for the player to teleport from 
-  their current location to their home coordinates.
-- Sending 'SPAWN' will provide a quote for the player to teleport from
-  their current location to the world spawn coordinates.
-- No teleport will occur and no funds will be deducted from 
-  the player's balance.
-- 
 ### `/enabledeathinsurance [true/false]`
 
 Used to switch the death insurance feature on or off.
@@ -105,37 +103,32 @@ Used to switch the death insurance feature on or off.
 - Alias[es]: `/toggledeathpolicy`
 - Permission: `bananosuite.setconfig`
 
-### `/startdeathinsurance [None/Inventory/Full]`
+### `/deathinsurance [start/stop/quote/query] [start/quote only: None/Inventory/Full]`
 
 Used to activate a Death Insurance policy.
 
-- Activates a Death Insurance policy.
+- Activates/stops/queries/quotes a Death Insurance policy.
+- Passing the parameters 'start' and a policy level of 'Inventory'
+  or 'Full' will open a new policy, or upgrade an existing policy.
 - When a Death Insurance policy is active and the player dies with
   sufficient funds to cover the policy premium, the amount will
   be deducted from their balance, and they will respawn with
   their inventory intact if using an Inventory policy, plus 
   xp if they have Full coverage.
+- If the player has insufficient funds to cover the premium upon
+  death, the player's items/xp will drop as a normal death and
+  the player will respawn at their respawn point as normal.
 - The Death Insurance premium will increase with each death
   within a 24 hour period.
-- Passing the parameter 'None' will perform the same function
-  as `/stopdeathinsurance`.
+- Passing the parameter 'stop' will terminate any existing policy.
+- Passing the parameter 'quote' and a policy level will provide
+  a message identifying the first premium to the requester.
+- Passing the parameter 'query' will provide a message identifying
+  the player's current policy level, if any.
 - Already having an active policy and re-calling the command
   with a different policy option will override the existing
   policy with the new type.
-- Alias[es]: `/startdeathpolicy`
-
-### `/stopdeathinsurance`
-
-Used to switch the death insurance feature off.
-
-- Deactivates a Death Insurance policy.
-- Alias[es]: `/stopdeathpolicy`
-
-### `/quotedeathinsurance [Inventory/Full]`
-
-Used to provide an estimate of the first Death Insurance policy premium.
-
-- Alias[es]: `/diquote`
+- Alias[es]: `/di`
 
 ### `/pvptoggle [PVPOFF/PVPON/QUERY]`
 

@@ -9,9 +9,10 @@ import org.bukkit.util.StringUtil;
 import java.util.ArrayList;
 import java.util.List;
 
-public class QuoteDeathInsuranceCommandTabCompleter implements TabCompleter {
+public class DeathInsuranceCommandTabCompleter implements TabCompleter {
 
-    public QuoteDeathInsuranceCommandTabCompleter() {
+    public DeathInsuranceCommandTabCompleter() {
+
     }
 
     @Override
@@ -21,6 +22,17 @@ public class QuoteDeathInsuranceCommandTabCompleter implements TabCompleter {
 
         if(args.length == 1) {
 
+            results.add("start");
+            results.add("stop");
+            results.add("quote");
+            results.add("query");
+
+        }
+        else if(args.length == 2
+                 && (args[1].equalsIgnoreCase("start")
+                       || args[1].equalsIgnoreCase("quote"))) {
+
+            results.add(DeathInsuranceOption.None.name());
             results.add(DeathInsuranceOption.Inventory.toString());
             results.add(DeathInsuranceOption.Full.toString());
 

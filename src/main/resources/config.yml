@@ -2,11 +2,17 @@ mongoURI: "INSERT MONGOURI HERE"
 
 EnableBananoSuite: true
 
-# Home Command Configuration
-RestrictHomeToOverworld: true
+EnableDonateCommand: true
+EnableMonKeyMaps: true
+EnablePvpToggle: true
+EnableRainCommand: true
+EnableTeleportCommands: true
 
 # Rain Command Configuration
 MinimumRainPerPlayer: 0.1
+
+# Home Command Configuration
+RestrictHomeToOverworld: true
 
 # Spawn Teleport Configuration
 FreeSpawnTeleport: false

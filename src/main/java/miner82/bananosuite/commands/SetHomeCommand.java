@@ -27,6 +27,15 @@ public class SetHomeCommand extends BaseCommand implements CommandExecutor {
 
         }
 
+        if(!this.configEngine.getIsEnabled()
+                || !this.configEngine.getTeleportEnabled()) {
+
+            SendMessage(player, "That command is not enabled on this server.", ChatColor.GOLD);
+
+            return false;
+
+        }
+
         if(this.configEngine.getRestrictHomeToOverworld()
              && !player.getWorld().getEnvironment().equals(World.Environment.NORMAL)) {
 

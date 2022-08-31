@@ -8,12 +8,7 @@ import org.bukkit.util.StringUtil;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TeleportQuoteCommandTabCompleter implements TabCompleter {
-
-    public TeleportQuoteCommandTabCompleter() {
-
-    }
-
+public class TeleportDirectCommandTabCompleter implements TabCompleter {
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
 
@@ -21,8 +16,7 @@ public class TeleportQuoteCommandTabCompleter implements TabCompleter {
 
         if(args.length == 1) {
 
-            results.add("HOME");
-            results.add("SPAWN");
+            results.add("QUOTE");
 
         }
 

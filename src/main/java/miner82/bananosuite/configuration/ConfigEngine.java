@@ -21,6 +21,12 @@ public class ConfigEngine {
 
     private boolean enablePlugin = true;
 
+    private boolean donateCommandEnabled = true;
+    private boolean monkeyMapsEnabled = true;
+    private boolean pvpToggleEnabled = true;
+    private boolean rainEnabled = true;
+    private boolean teleportEnabled = true;
+
     private double minimumRainPerPlayer = 0.1;
 
     private boolean restrictHomeToOverworld = true;
@@ -90,6 +96,36 @@ public class ConfigEngine {
 
     public void setIsSpawnTeleportFree(boolean value) {
         this.isSpawnTeleportFree = value;
+    }
+
+    public boolean getDonateCommandIsEnabled() { return this.donateCommandEnabled; }
+
+    public void setDonateCommandIsEnabled(boolean enabled) {
+        this.donateCommandEnabled = enabled;
+    }
+
+    public boolean getMonkeyMapsEnabled() { return this.monkeyMapsEnabled; }
+
+    public void setMonkeyMapsEnabled(boolean enabled) {
+        this.monkeyMapsEnabled = enabled;
+    }
+
+    public boolean getPvpToggleEnabled() { return this.pvpToggleEnabled; }
+
+    public void setPvpToggleEnabled(boolean enabled) {
+        this.pvpToggleEnabled = enabled;
+    }
+
+    public boolean getRainEnabled() { return this.rainEnabled; }
+
+    public void setRainEnabled(boolean enabled) {
+        this.rainEnabled = enabled;
+    }
+
+    public boolean getTeleportEnabled() { return this.teleportEnabled; }
+
+    public void setTeleportEnabled(boolean enabled) {
+        this.teleportEnabled = enabled;
     }
 
     public boolean getDeathInsuranceEnabled() {
@@ -470,6 +506,13 @@ public class ConfigEngine {
         FileConfiguration config = this.main.getConfig();
 
         config.set("EnableBananoSuite", this.enablePlugin);
+
+        config.set("EnableDonateCommand", this.donateCommandEnabled);
+        config.set("EnableMonKeyMaps", this.monkeyMapsEnabled);
+        config.set("EnablePvpToggle", this.pvpToggleEnabled);
+        config.set("EnableRainCommand", this.rainEnabled);
+        config.set("EnableTeleportCommands", this.teleportEnabled);
+
         config.set("RestrictHomeToOverworld", this.restrictHomeToOverworld);
         config.set("FreeSpawnTeleport", this.isSpawnTeleportFree);
         config.set("EnableDeathInsurance", this.enableDeathInsurance);
@@ -522,6 +565,21 @@ public class ConfigEngine {
             }
 
             setIsEnabled(true);
+
+            donateCommandEnabled = configuration.getBoolean("EnableDonateCommand");
+            System.out.println("- Donate Command: " + (donateCommandEnabled ? "Active" : "Deactivated"));
+
+            monkeyMapsEnabled = configuration.getBoolean("EnableMonKeyMaps");
+            System.out.println("- MonkeyMaps Command: " + (monkeyMapsEnabled ? "Active" : "Deactivated"));
+
+            pvpToggleEnabled = configuration.getBoolean("EnablePvpToggle");
+            System.out.println("- PvP Toggle Command: " + (pvpToggleEnabled ? "Active" : "Deactivated"));
+
+            rainEnabled = configuration.getBoolean("EnableRainCommand");
+            System.out.println("- Rain Command: " + (rainEnabled ? "Active" : "Deactivated"));
+
+            teleportEnabled = configuration.getBoolean("EnableTeleportCommands");
+            System.out.println("- Teleport Commands: " + (teleportEnabled ? "Active" : "Deactivated"));
 
             minimumRainPerPlayer = configuration.getDouble("MinimumRainPerPlayer");
             System.out.println("- Minimum Rain Per Player: " + this.minimumRainPerPlayer);

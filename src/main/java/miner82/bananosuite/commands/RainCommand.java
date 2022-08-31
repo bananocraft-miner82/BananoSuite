@@ -14,7 +14,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Random;
 
@@ -41,6 +40,15 @@ public class RainCommand extends BaseCommand implements CommandExecutor {
 
         final Player player = (Player) sender;
 
+        if(!this.configEngine.getIsEnabled()
+                || !this.configEngine.getRainEnabled()) {
+
+            SendMessage(player, "That command is not enabled on this server.", ChatColor.GOLD);
+
+            return false;
+
+        }
+
         if(args.length == 0) {
 
             SendMessage(player, "Incorrect arguments. Expected 1, received " + args.length, ChatColor.RED);
@@ -53,7 +61,7 @@ public class RainCommand extends BaseCommand implements CommandExecutor {
         try {
             final double rainAmount = Double.parseDouble(args[0]);
             Object[] onlinePlayers = Bukkit.getOnlinePlayers().stream().filter(x -> !x.equals(player)).toArray();
-            int playersOnline = Bukkit.getOnlinePlayers().size() - 1; // Exclude the sender!
+            int playersOnline = onlinePlayers.length;
             boolean testmode = false;
 
             if(args.length > 1
@@ -62,9 +70,11 @@ public class RainCommand extends BaseCommand implements CommandExecutor {
 
                 testmode = args[1].equalsIgnoreCase("testmode");
 
-                if(testmode
-                     && playersOnline == 0) {
+                if(testmode) {
+
                     playersOnline = 1;
+                    onlinePlayers = new Object[] { player };
+
                 }
 
             }
@@ -101,18 +111,19 @@ public class RainCommand extends BaseCommand implements CommandExecutor {
 
                 params.put(KEY_RECIPIENTS, onlinePlayers);
 
+                Bukkit.broadcastMessage(ChatColor.GOLD + "Hmm, it's beginning to look like rain...");
+
                 new PaymentProcessor(econ, player, totalRain, params, this::RainCallback)
                         .runTaskAsynchronously(Main.getPlugin(Main.class));
-
-                TriggerWeather();
 
             }
             else {
 
                 SendMessage(player, "Test mode activated: weather triggering...", ChatColor.GREEN);
-                TriggerWeather();
 
             }
+
+            TriggerWeather();
 
         }
         catch (NumberFormatException ex) {

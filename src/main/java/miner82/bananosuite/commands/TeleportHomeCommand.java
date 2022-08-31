@@ -1,15 +1,13 @@
 package miner82.bananosuite.commands;
 
+import miner82.bananosuite.DB;
 import miner82.bananosuite.classes.DistanceCalculator;
 import miner82.bananosuite.classes.TeleportLocationMaker;
 import miner82.bananosuite.classes.TeleportPremiumCalculator;
 import miner82.bananosuite.configuration.ConfigEngine;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.economy.EconomyResponse;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -17,16 +15,12 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.util.Vector;
 
-import java.util.Optional;
-
-public class SpawnTeleportCommand extends BaseCommand implements CommandExecutor {
-
-    private final String KEY_DESTINATION = "destination";
+public class TeleportHomeCommand extends BaseCommand implements CommandExecutor {
 
     private Economy econ;
     private ConfigEngine configEngine;
 
-    public SpawnTeleportCommand(ConfigEngine configEngine, Economy econ) {
+    public TeleportHomeCommand(ConfigEngine configEngine, Economy econ) {
         this.configEngine = configEngine;
         this.econ = econ;
     }
@@ -48,6 +42,15 @@ public class SpawnTeleportCommand extends BaseCommand implements CommandExecutor
 
         }
 
+        if(!this.configEngine.getIsEnabled()
+                || !this.configEngine.getTeleportEnabled()) {
+
+            SendMessage(player, "That command is not enabled on this server.", ChatColor.GOLD);
+
+            return false;
+
+        }
+
         if(args.length > 0
              && args[0].equalsIgnoreCase("quote")) {
 
@@ -58,13 +61,7 @@ public class SpawnTeleportCommand extends BaseCommand implements CommandExecutor
         // Process the teleport fee
         try {
             // Calculate the distance
-            Optional<World> world = Bukkit.getWorlds().stream().filter(x -> x.getEnvironment().equals(World.Environment.NORMAL)).findFirst();
-
-            if(!world.isPresent()) {
-                return false;
-            }
-
-            Location destination = world.get().getSpawnLocation();
+            Location destination = DB.getPlayerHomeLocation(player);
 
             if(destination != null) {
 
@@ -72,30 +69,24 @@ public class SpawnTeleportCommand extends BaseCommand implements CommandExecutor
 
                 if(destination == null) {
 
-                    SendMessage(player, "Your teleport destination does not appear to be safe! Please contact an OP.", ChatColor.RED);
+                    SendMessage(player, "Your teleport destination does not appear to be safe! Please try setting it to a different location.", ChatColor.RED);
 
                     return false;
 
                 }
 
-                if(this.configEngine.getIsSpawnTeleportFree()) {
-                    player.teleport(destination);
-
-                    return true;
-                }
-
                 Location currentLocation = player.getLocation();
 
-                int minimumTeleportDistance = this.configEngine.getMinimumTeleportDistance();
+                int minimumDistance = this.configEngine.getMinimumTeleportDistance();
                 double distance = DistanceCalculator.calculateDistance(currentLocation, destination);
 
-                if(distance > minimumTeleportDistance) {
+                if(distance > minimumDistance) {
 
                     double teleportCost = TeleportPremiumCalculator.calculateTeleportCost(this.configEngine, currentLocation, destination);
 
                     if(quote) {
 
-                        SendMessage(player, "A teleport to spawn will cost " + econ.format(teleportCost), ChatColor.GOLD);
+                        SendMessage(player, "A teleport to home will cost " + econ.format(teleportCost), ChatColor.GOLD);
 
                         return true;
 
@@ -129,7 +120,6 @@ public class SpawnTeleportCommand extends BaseCommand implements CommandExecutor
                                 player.setGravity(true);
 
                                 SendMessage(player, "Your teleport request has been completed and " + econ.format(teleportCost) + " has been deducted from your balance.", ChatColor.GREEN);
-
                             }
 
                         }

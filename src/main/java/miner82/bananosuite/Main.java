@@ -36,17 +36,15 @@ public final class Main extends JavaPlugin {
 
         getCommand("reloadbananosuiteconfig").setExecutor(new ReloadConfigurationCommand(this.configEngine));
         getCommand("raiseshields").setExecutor(new RaiseShieldsCommand(this.configEngine));
-        // Command ideas:
-        // Death Insurance
-        getCommand("enabledeathinsurance").setExecutor(new EnableDeathInsuranceCommand(this.configEngine));
-        getCommand("stopdeathinsurance").setExecutor(new StopDeathInsuranceCommand(this.configEngine));
+
+        getCommand("bananosuite").setExecutor(new EnableCommand(this.configEngine));
 
         getCommand("sethome").setExecutor(new SetHomeCommand(this.configEngine));
-        getCommand("pvptoggle").setExecutor(new PvPOptInOutCommand(this.configEngine));
+        //////getCommand("pvptoggle").setExecutor(new PvPOptInOutCommand(this.configEngine));
 
 
-        getCommand("enabledeathinsurance").setTabCompleter(new EnableDeathInsuranceCommandTabCompleter(this.configEngine));
-        getCommand("pvptoggle").setTabCompleter(new PvPOptInOutTabCompleter(this.configEngine));
+        getCommand("bananosuite").setTabCompleter(new EnableCommandTabCompleter(this.configEngine));
+        //////getCommand("pvptoggle").setTabCompleter(new PvPOptInOutTabCompleter(this.configEngine));
 
         // Donate - possibly gift a random item from a weighted list? Change player messaging colour for a period of time.
         // Home Teleport - DONE
@@ -95,18 +93,16 @@ public final class Main extends JavaPlugin {
 
         getCommand("donate").setExecutor(new DonateCommand(this.configEngine, this.econ));
         getCommand("rain").setExecutor(new RainCommand(this.configEngine, this.econ));
-        getCommand("tphome").setExecutor(new HomeTeleportCommand(this.configEngine, this.econ));
-        getCommand("tpspawn").setExecutor(new SpawnTeleportCommand(this.configEngine, this.econ));
-        getCommand("tpquote").setExecutor(new TeleportQuoteCommand(this.configEngine, this.econ));
-        getCommand("startdeathinsurance").setExecutor(new StartDeathInsuranceCommand(this.configEngine, this.econ));
-        getCommand("quotedeathinsurance").setExecutor(new QuoteDeathInsuranceCommand(this.configEngine, this.econ));
+        getCommand("teleport").setExecutor(new TeleportCommand(this.configEngine, this.econ));
+        getCommand("home").setExecutor(new TeleportHomeCommand(this.configEngine, this.econ));
+        getCommand("spawn").setExecutor(new TeleportSpawnCommand(this.configEngine, this.econ));
+        getCommand("deathinsurance").setExecutor(new DeathInsuranceCommand(this.configEngine, this.econ));
         getCommand("buymonkeymap").setExecutor(new MonKeyMapCommand(this.configEngine, econ));
 
-        getCommand("quotedeathinsurance").setTabCompleter(new QuoteDeathInsuranceCommandTabCompleter());
-        getCommand("startdeathinsurance").setTabCompleter(new StartDeathInsuranceCommandTabCompleter());
-        getCommand("tpquote").setTabCompleter(new TeleportQuoteCommandTabCompleter());
-        getCommand("tphome").setTabCompleter(new DirectTeleportCommandTabCompleter());
-        getCommand("tpspawn").setTabCompleter(new DirectTeleportCommandTabCompleter());
+        getCommand("deathinsurance").setTabCompleter(new DeathInsuranceCommandTabCompleter());
+        getCommand("teleport").setTabCompleter(new TeleportCommandTabCompleter());
+        getCommand("home").setTabCompleter(new TeleportDirectCommandTabCompleter());
+        getCommand("spawn").setTabCompleter(new TeleportDirectCommandTabCompleter());
         getCommand("buymonkeymap").setTabCompleter(new MonKeyMapTabCompleter(this.configEngine));
 
         Bukkit.getPluginManager().registerEvents(new OnPlayerDeathEvent(this.configEngine, this.econ), this);

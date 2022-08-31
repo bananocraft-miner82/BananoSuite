@@ -29,6 +29,12 @@ public class MonKeyMapTabCompleter implements TabCompleter {
             results.add(MonKeyType.QRCode.toString());
 
         }
+        else if(args.length == 2
+                 && args[1] == null || args[1] == "") {
+
+            results.add("ban_");
+
+        }
         else if(args.length == 3
                  && args[0].equalsIgnoreCase(MonKeyType.MonKey.toString())
                  && this.configEngine.getApplyFrame().length() > 0) {

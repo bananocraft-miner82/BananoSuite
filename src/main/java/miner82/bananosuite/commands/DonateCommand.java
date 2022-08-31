@@ -43,6 +43,15 @@ public class DonateCommand extends BaseCommand implements CommandExecutor {
 
         }
 
+        if(!this.configEngine.getIsEnabled()
+                || !this.configEngine.getDonateCommandIsEnabled()) {
+
+            SendMessage(player, "That command is not enabled on this server.", ChatColor.GOLD);
+
+            return false;
+
+        }
+
         if(args.length != 1) {
 
             SendMessage(player, "Incorrect arguments. Expected 1, received " + args.length, ChatColor.RED);
@@ -121,7 +130,13 @@ public class DonateCommand extends BaseCommand implements CommandExecutor {
                     metaData.setPower(2);
                     star.setItemMeta(metaData);
 
-                    donater.getInventory().addItem(star);
+                    HashMap<Integer,ItemStack> failedItems = donater.getInventory().addItem(star);
+
+                    if(!failedItems.isEmpty()) {
+
+                        donater.getWorld().dropItem(donater.getLocation(), star);
+
+                    }
 
                     giftedFireworks = true;
 
@@ -159,7 +174,14 @@ public class DonateCommand extends BaseCommand implements CommandExecutor {
                             int quantity = miner82.bananosuite.classes.Math.RandomBetween(prize.getMinimumQuantity(), prize.getMaximumQuantity());
 
                             ItemStack donationPrize = new ItemStack(prize.getMaterial(), quantity);
-                            donater.getInventory().addItem(donationPrize);
+
+                            HashMap<Integer,ItemStack> failedItems = donater.getInventory().addItem(donationPrize);
+
+                            if(!failedItems.isEmpty()) {
+
+                                donater.getWorld().dropItem(donater.getLocation(), donationPrize);
+
+                            }
 
                             randomGift = true;
 

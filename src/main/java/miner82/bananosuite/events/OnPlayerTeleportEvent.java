@@ -27,6 +27,7 @@ public class OnPlayerTeleportEvent implements Listener {
         //    double teleportCost = TeleportPremiumCalculator.calculateTeleportCost(this.configEngine, event.getFrom(), event.getTo());
 
 
+
         //}
 
     }

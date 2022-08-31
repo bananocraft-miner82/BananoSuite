@@ -1,6 +1,5 @@
 package miner82.bananosuite.tabcompleters;
 
-import miner82.bananosuite.classes.DeathInsuranceOption;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
@@ -9,9 +8,9 @@ import org.bukkit.util.StringUtil;
 import java.util.ArrayList;
 import java.util.List;
 
-public class StartDeathInsuranceCommandTabCompleter implements TabCompleter {
+public class TeleportCommandTabCompleter implements TabCompleter {
 
-    public StartDeathInsuranceCommandTabCompleter() {
+    public TeleportCommandTabCompleter() {
 
     }
 
@@ -22,9 +21,13 @@ public class StartDeathInsuranceCommandTabCompleter implements TabCompleter {
 
         if(args.length == 1) {
 
-            results.add(DeathInsuranceOption.None.toString());
-            results.add(DeathInsuranceOption.Inventory.toString());
-            results.add(DeathInsuranceOption.Full.toString());
+            results.add("HOME");
+            results.add("SPAWN");
+
+        }
+        else if(args.length == 2) {
+
+            results.add("QUOTE");
 
         }
 

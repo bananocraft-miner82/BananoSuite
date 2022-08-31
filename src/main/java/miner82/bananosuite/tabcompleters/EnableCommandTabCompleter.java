@@ -9,10 +9,10 @@ import org.bukkit.util.StringUtil;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EnableDeathInsuranceCommandTabCompleter implements TabCompleter{
+public class EnableCommandTabCompleter implements TabCompleter{
     private ConfigEngine configEngine;
 
-    public EnableDeathInsuranceCommandTabCompleter(ConfigEngine configEngine) {
+    public EnableCommandTabCompleter(ConfigEngine configEngine) {
         this.configEngine = configEngine;
     }
 
@@ -23,8 +23,19 @@ public class EnableDeathInsuranceCommandTabCompleter implements TabCompleter{
 
         if(args.length == 1) {
 
+            results.add("deathinsurance");
+            results.add("donate");
+            results.add("monkeymaps");
+            results.add("pvptoggle");
+            results.add("rain");
+            results.add("teleport");
+
+        }
+        else if(args.length == 2) {
+
             results.add("enable");
             results.add("disable");
+            results.add("status");
 
         }
 

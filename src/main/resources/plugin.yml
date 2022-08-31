@@ -7,6 +7,8 @@ depend: [Vault]
 commands:
   reloadbananosuiteconfig:
     description: Reloads the configuration file.
+  bananosuite:
+    description: OP commands to manage the plugin configuration.
   raiseshields:
     description: OP-only command to prevent damage.
     aliases: [redalert,shieldsup]
@@ -17,26 +19,21 @@ commands:
     aliases: [makeitrain]
   sethome:
     description: Sets the home co-ordinates for use with the /home command.
-  tphome:
-    description: Teleports the player to their home co-ordinates, for a fee.
-    aliases: [tph]
-  tpspawn:
+  teleport:
+    description: Teleports the player to the specified location, for a fee. Additional QUOTE parameter to query the cost.
+    aliases: [tp]
+  spawn:
     description: Teleports the player to the world spawn coordinates, for a fee.
     aliases: [tps]
-  tpquote:
-    description: Provides a quote for the home or spawn teleports.
+  home:
+    description: Teleports the player to the world spawn coordinates, for a fee.
+    aliases: [tph]
   enabledeathinsurance:
     description: Toggles Death insurance on/off.
     aliases: [toggledeathpolicy]
-  startdeathinsurance:
-    description: Initiates a Death insurance policy.
-    aliases: [startdeathpolicy]
-  stopdeathinsurance:
-    description: Terminates a Death insurance policy.
-    aliases: [stopdeathpolicy]
-  quotedeathinsurance:
-    description: Provides details of what the first premium will cost.
-    aliases: [diquote]
+  deathinsurance:
+    description: Toggles Death insurance on/off, or offers a policy quote.
+    aliases: [di]
   pvptoggle:
     description: Toggles PvP on/off.
   buymonkeymap:

@@ -25,6 +25,10 @@ public class OnPlayerDeathEvent implements Listener {
     @EventHandler
     public void onPlayerDeath(PlayerDeathEvent args) {
 
+        if(!this.configEngine.getDeathInsuranceEnabled()) {
+            return;
+        }
+
         Player player = args.getEntity();
 
         DeathInsuranceOption insuranceOption = DB.getPlayerDeathInsurance(player);
