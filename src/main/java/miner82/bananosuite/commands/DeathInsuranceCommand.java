@@ -115,7 +115,17 @@ public class DeathInsuranceCommand extends BaseCommand implements CommandExecuto
         }
         else if(args[0].equalsIgnoreCase("quote")) {
 
-            DeathInsuranceOption option = DeathInsuranceOption.valueOf(args[1]);
+            DeathInsuranceOption option = DB.getPlayerDeathInsurance(player);
+
+            if(args.length == 2) {
+
+                try {
+                    option = DeathInsuranceOption.valueOf(args[1]);
+                }
+                catch (IllegalArgumentException ex) {
+                    option = DB.getPlayerDeathInsurance(player);
+                }
+            }
 
             SendMessage(player, "Your next premium for " + option.toString() + " death insurance will cost " + econ.format(DeathInsurancePremiumCalculator.CalculateNextPremium(this.configEngine, player, option)) + " and the cost will increase based on the number of deaths in a 24 hour period.", ChatColor.GREEN);
 

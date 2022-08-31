@@ -29,8 +29,8 @@ public class DeathInsuranceCommandTabCompleter implements TabCompleter {
 
         }
         else if(args.length == 2
-                 && (args[1].equalsIgnoreCase("start")
-                       || args[1].equalsIgnoreCase("quote"))) {
+                 && (args[0].equalsIgnoreCase("start")
+                       || args[0].equalsIgnoreCase("quote"))) {
 
             results.add(DeathInsuranceOption.None.name());
             results.add(DeathInsuranceOption.Inventory.toString());

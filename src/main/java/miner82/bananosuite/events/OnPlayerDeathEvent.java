@@ -45,7 +45,8 @@ public class OnPlayerDeathEvent implements Listener {
             if(basePremium > 0
                   && insuranceFee == 0) {
 
-                player.sendMessage(ChatColor.GOLD + "Your first death insurance premium each month is free. Thanks for being a citizen!");
+                player.sendMessage(ChatColor.GOLD + "Your first death insurance premium each week is free. Thanks for being a citizen!");
+                activateDeathInsurance = true;
 
             }
 

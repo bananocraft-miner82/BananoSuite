@@ -152,8 +152,27 @@ public class MonKeyMapCommand extends BaseCommand implements CommandExecutor {
                         Graphics2D gO = image.createGraphics();
                         gO.setColor(Color.BLUE);
                         gO.setFont(new Font( "SansSerif", Font.BOLD, 12 ));
-                        gO.drawString(player.getName(), 5, 126);
 
+                        if(args.length > 3) {
+
+                            String text = "";
+
+                            for(int index = 3; index < args.length; index++) {
+
+                                text += " " + args[index];
+
+                            }
+
+                            if(text.trim().length() == 0) {
+                                text = player.getName();
+                            }
+
+                            gO.drawString(text.trim(), 5, 126);
+
+                        }
+                        else {
+                            gO.drawString(player.getName(), 5, 126);
+                        }
                     }
 
                     ImageIO.write(image, "png", outputFile);

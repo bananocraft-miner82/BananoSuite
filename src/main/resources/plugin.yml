@@ -28,9 +28,6 @@ commands:
   home:
     description: Teleports the player to the world spawn coordinates, for a fee.
     aliases: [tph]
-  enabledeathinsurance:
-    description: Toggles Death insurance on/off.
-    aliases: [toggledeathpolicy]
   deathinsurance:
     description: Toggles Death insurance on/off, or offers a policy quote.
     aliases: [di]
