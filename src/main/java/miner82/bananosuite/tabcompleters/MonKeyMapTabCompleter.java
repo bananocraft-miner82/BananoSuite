@@ -27,6 +27,7 @@ public class MonKeyMapTabCompleter implements TabCompleter {
 
             results.add(MonKeyType.MonKey.toString());
             results.add(MonKeyType.QRCode.toString());
+            results.add("help");
 
         }
         else if(args.length == 2

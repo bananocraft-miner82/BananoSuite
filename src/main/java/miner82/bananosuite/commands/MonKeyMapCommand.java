@@ -58,6 +58,17 @@ public class MonKeyMapCommand extends BaseCommand implements CommandExecutor {
 
             }
 
+            if(args.length > 0
+                 && args[0].equalsIgnoreCase("help")) {
+
+                SendMessage(player, "MonKeyMaps come in two varieties: QR Codes and MonKeys.", ChatColor.GOLD);
+                SendMessage(player, "QR Codes are generated using the address you provide, with any text after replacing your name. These cost " + econ.format(this.configEngine.getMapPrice(MonKeyType.QRCode)) + ".", ChatColor.GOLD);
+                SendMessage(player, "MonKeys are the monkey images generated using the address you provide, with any text after replacing your name. These cost " + econ.format(this.configEngine.getMapPrice(MonKeyType.MonKey)) + ".", ChatColor.GOLD);
+
+                return true;
+
+            }
+
             System.out.println("Player has permission. Commencing image retrieval...");
 
             if (args.length >= 2

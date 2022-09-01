@@ -25,6 +25,8 @@ public class HelpCommand extends BaseCommand implements CommandExecutor {
              && player.isOp()) {
 
             // List the OP-only commands
+            SendMessage(player, "Command Enable/Disable: Enable/disable commands.", ChatColor.YELLOW);
+            SendMessage(player, "/bananosuite [deathinsurance|donate|monkeymaps|pvptoggle|rain|teleport] [enable|disable|status]", ChatColor.GRAY);
 
         }
 
@@ -47,48 +49,30 @@ public class HelpCommand extends BaseCommand implements CommandExecutor {
 
         }
 
-        SendMessage(player, "PvP Toggle: Don't want to PvP? You can opt out! QUERY tells you your current PvP status.", ChatColor.YELLOW);
-        SendMessage(player, "/pvptoggle [PVPOFF|PVPON|QUERY]", ChatColor.GRAY);
+        //SendMessage(player, "PvP Toggle: Don't want to PvP? You can opt out! QUERY tells you your current PvP status.", ChatColor.YELLOW);
+        //SendMessage(player, "/pvptoggle [PVPOFF|PVPON|QUERY]", ChatColor.GRAY);
 
         SendMessage(player, "TELEPORT COMMANDS", ChatColor.GOLD);
         SendMessage(player, "Set Home: Set your teleport home location for use with the home teleport command.", ChatColor.YELLOW);
         SendMessage(player, "/sethome", ChatColor.GRAY);
 
+        SendMessage(player, "Teleport: Teleport to home/spawn location [chargeable service]. The greater the distance, the higher the cost. Use QUERY for a quote.", ChatColor.YELLOW);
+        SendMessage(player, "/teleport [optional:QUOTE]", ChatColor.GRAY);
+        SendMessage(player, "OR /tp [optional:QUOTE]", ChatColor.GRAY);
+
         SendMessage(player, "Teleport Home: Teleport to your home location [chargeable service]. The greater the distance, the higher the cost. Use QUERY for a quote.", ChatColor.YELLOW);
-        SendMessage(player, "/tphome [optional:QUERY]", ChatColor.GRAY);
-        SendMessage(player, "OR /tph [optional:QUERY]", ChatColor.GRAY);
+        SendMessage(player, "/home [optional:QUOTE]", ChatColor.GRAY);
+        SendMessage(player, "OR /tph [optional:QUOTE]", ChatColor.GRAY);
 
         SendMessage(player, "Teleport to Spawn: Teleport to the world spawn location [chargeable service]. The greater the distance, the higher the cost. Use QUERY for a quote.", ChatColor.YELLOW);
-        SendMessage(player, "/tpspawn [optional:QUERY]", ChatColor.GRAY);
-        SendMessage(player, "OR /tps [optional:QUERY]", ChatColor.GRAY);
-
-        SendMessage(player, "Teleport Quote: Get the cost of the desired teleport. The greater the distance, the higher the cost.", ChatColor.YELLOW);
-        SendMessage(player, "/tpquote [HOME|SPAWN]", ChatColor.GRAY);
+        SendMessage(player, "/spawn [optional:QUOTE]", ChatColor.GRAY);
+        SendMessage(player, "OR /tps [optional:QUOTE]", ChatColor.GRAY);
 
         SendMessage(player, "DEATH INSURANCE COMMANDS", ChatColor.GOLD);
 
-        SendMessage(player, "Teleport Quote: Get the cost of the desired teleport. The greater the distance, the higher the cost.", ChatColor.YELLOW);
-        SendMessage(player, "/tpquote [HOME|SPAWN]", ChatColor.GRAY);
-
-        if(player != null && player.isOp()) {
-
-            SendMessage(player, "Enable/Disable Death Insurance: Admin tool to toggle DI on or off.", ChatColor.YELLOW);
-            SendMessage(player, "/enabledeathinsurance [enable|disable]", ChatColor.GRAY);
-            SendMessage(player, "OR /toggledeathpolicy [enable|disable]", ChatColor.GRAY);
-
-        }
-
-        SendMessage(player, "Start Death Insurance: Take out a Death Insurance Policy. You are only charged when you die!", ChatColor.YELLOW);
-        SendMessage(player, "/startdeathinsurance [None|Inventory|Full]", ChatColor.GRAY);
-        SendMessage(player, "OR /startdeathpolicy [None|Inventory|Full]", ChatColor.GRAY);
-
-        SendMessage(player, "Stop Death Insurance: End a Death Insurance Policy.", ChatColor.YELLOW);
-        SendMessage(player, "/stopdeathinsurance", ChatColor.GRAY);
-        SendMessage(player, "OR /stopdeathpolicy", ChatColor.GRAY);
-
-        SendMessage(player, "Death Insurance Quote: Find out how much the first Death Insurance Policy premium will cost. More deaths in 24 hours = higher premiums!", ChatColor.YELLOW);
-        SendMessage(player, "/quotedeathinsurance [Inventory|Full]", ChatColor.GRAY);
-        SendMessage(player, "OR /diquote [Inventory|Full]", ChatColor.GRAY);
+        SendMessage(player, "Start/Stop/Query Death Insurance: Take out/cancel/query a Death Insurance Policy. You are only charged when you die!", ChatColor.YELLOW);
+        SendMessage(player, "/deathinsurance [start|stop|quote|query] [None|Inventory|Full]", ChatColor.GRAY);
+        SendMessage(player, "OR /di [start|stop|quote|query] [None|Inventory|Full]", ChatColor.GRAY);
 
         SendMessage(player, "MAP COMMANDS", ChatColor.GOLD);
 
