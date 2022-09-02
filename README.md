@@ -35,10 +35,6 @@ Used to make a donation to the server funds.
 - Deducts the specified amount from the player's balance and sends it to the
   server's balance.
 
-rain:
-description: Donates the specified amount to the server.
-aliases: [banrain,makeitrain]
-
 ### `/rain [amount]`
 
 Used to airdrop an amount to the other online players on the server.
@@ -46,10 +42,11 @@ Used to airdrop an amount to the other online players on the server.
 - The airdropped amount will be divided up evenly amongst all of the
   online players on the server.
 - The command will also trigger a short storm.
+- aliases: [makeitrain]
 
 ### `/sethome`
 
-Used to set player's home coordinates for use with the `/tphome` command.
+Used to set player's home coordinates for use with the `/home` and `/teleport home` commands.
 
 - Saves the player's current location as their home coordinates.
 - If unspecified, the playérs home coordinates will be their last bed spawn location
@@ -141,6 +138,25 @@ Used to provide an estimate of the first Death Insurance policy premium.
 - If a player is attacked with PvP opted-out, the attacker
   will take minor damage and the player being attacked will
   not incur any damage.
+
+### `/buymonkeymap [MonKey|QRCode|help] [ban_ address] [MonKey:frame option|QRCode:text to display at the base of the QR code]`
+
+Enables the player to buy a map displaying their MonKey, or a QR Code map, for their
+provided Banano address.
+
+- To query the prices, use the command `/buymonkeymap help`
+
+MonKeys:
+- MonKey commands follow the format:
+  `/buymonkeymap MonKey ban_address [frame type:fancy|none]`
+- If a frame is specified, it will be overlaid on the MonKey image.
+- If no frame/none is specified, the MonKey will have the default background.
+
+QR Codes:
+- QR Code commands follow the format:
+   `/buymonkeymap QRCode ban_address [Optional:Text to display at the bottom of the QR Code]`
+- If no additional text is defined, the purchasing player's name will be
+  displayed at the base of the QR Code.
 
 ### About the permissions
 
