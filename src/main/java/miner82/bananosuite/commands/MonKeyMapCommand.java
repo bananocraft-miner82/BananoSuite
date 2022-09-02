@@ -164,11 +164,11 @@ public class MonKeyMapCommand extends BaseCommand implements CommandExecutor {
                         gO.setColor(Color.BLUE);
                         gO.setFont(new Font( "SansSerif", Font.BOLD, 12 ));
 
-                        if(args.length > 3) {
+                        if(args.length >= 3) {
 
                             String text = "";
 
-                            for(int index = 3; index < args.length; index++) {
+                            for(int index = 2; index < args.length; index++) {
 
                                 text += " " + args[index];
 
