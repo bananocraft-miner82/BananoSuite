@@ -1,17 +1,15 @@
 name: BananoSuite
 version: '${project.version}'
-main: miner82.bananosuite.Main
+main: miner82.bananosuite.BananoSuitePlugin
 api-version: 1.15
 authors: [ Miner82 ]
 depend: [Vault]
+softdepend: [Essentials]
 commands:
-  reloadbananosuiteconfig:
-    description: Reloads the configuration file.
   bananosuite:
     description: OP commands to manage the plugin configuration.
-  raiseshields:
+  shields:
     description: OP-only command to prevent damage.
-    aliases: [redalert,shieldsup]
   donate:
     description: Donates the specified amount to the server.
   rain:
@@ -31,9 +29,9 @@ commands:
   deathinsurance:
     description: Toggles Death insurance on/off, or offers a policy quote.
     aliases: [di]
-  pvptoggle:
-    description: Toggles PvP on/off.
-  buymonkeymap:
+#  pvptoggle:
+#    description: Toggles PvP on/off.
+  monkeymap:
     description: Provides the ability to buy a map displaying the monKey or QR code for your Banano address.
   help:
     description: Displays a list of commands and possible parameters.

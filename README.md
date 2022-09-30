@@ -12,20 +12,6 @@ Version 3.
 
 ## Commands and Permissions
 
-### `/reloadbananosuiteconfig`
-
-Forces a live reload of the configuration settings.
-
-- Alias[es]: `/bmreloadcfg`
-- Permission: `bananosuite.setconfig`
-
-### `/raiseshields`
-
-Used to make the OP players impervious to damage and facilitate unhindered moderation.
-
-- Alias[es] `/redalert, /shieldsup`
-- Permission: OP
-
 ### `/donate [amount]`
 
 Used to make a donation to the server funds.
@@ -35,7 +21,7 @@ Used to make a donation to the server funds.
 - Deducts the specified amount from the player's balance and sends it to the
   server's balance.
 
-### `/rain [amount]`
+### `/rain [amount] [optional:nearby|everyone] [optional(nearby only):distance]`
 
 Used to airdrop an amount to the other online players on the server.
 
@@ -92,14 +78,6 @@ Used to teleport the player to the world spawn coordinates.
   QUOTE parameter.
 - Alias[es] `/tps`
 
-### `/enabledeathinsurance [true/false]`
-
-Used to switch the death insurance feature on or off.
-
-- Switches on Death Insurance
-- Alias[es]: `/toggledeathpolicy`
-- Permission: `bananosuite.setconfig`
-
 ### `/deathinsurance [start/stop/quote/query] [start/quote only: None/Inventory/Full]`
 
 Used to activate a Death Insurance policy.
@@ -139,24 +117,56 @@ Used to provide an estimate of the first Death Insurance policy premium.
   will take minor damage and the player being attacked will
   not incur any damage.
 
-### `/buymonkeymap [MonKey|QRCode|help] [ban_ address] [MonKey:frame option|QRCode:text to display at the base of the QR code]`
+### `/monkeymap buy [MonKey|QRCode|help] [ban_ address] [MonKey:frame option|QRCode:text to display at the base of the QR code]`
+### `/monkeymap query`
+### `/monkeymap collect`
+### `/monkeymap retry`
+### `/monkeymap help`
 
 Enables the player to buy a map displaying their MonKey, or a QR Code map, for their
 provided Banano address.
 
 - To query the prices, use the command `/buymonkeymap help`
+- To query the status of any outstanding monkeymap orders, use the command `/monkeymap query`
+- To collect any ready monkeymap orders, use `/monkeymap collect`
+- To re-commence processing for any failed monkeymaps, use `/monkeymap retry`
 
 MonKeys:
 - MonKey commands follow the format:
-  `/buymonkeymap MonKey ban_address [frame type:fancy|none]`
+  `/monkeymap MonKey ban_address [frame type:fancy|none] [Optional: text to use in place of the player's name]`
 - If a frame is specified, it will be overlaid on the MonKey image.
 - If no frame/none is specified, the MonKey will have the default background.
 
 QR Codes:
 - QR Code commands follow the format:
-   `/buymonkeymap QRCode ban_address [Optional:Text to display at the bottom of the QR Code]`
+   `/monkeymap QRCode ban_address [Optional:Text to display at the bottom of the QR Code and for the map name]`
 - If no additional text is defined, the purchasing player's name will be
   displayed at the base of the QR Code.
+
+### OP-Only Commands
+
+### `/enabledeathinsurance [true/false]`
+
+Used to switch the death insurance feature on or off.
+
+- Switches on Death Insurance
+- Alias[es]: `/toggledeathpolicy`
+- Permission: `bananosuite.setconfig`
+
+### `/bananosuite reloadconfig`
+
+Refreshes the configuration from the file saved in the plugin's data folder.
+
+### `/bananosuite [deathinsurance|donate|monkeymaps|pvptoggle|rain|teleport] [enable|disable|query]`
+
+Used to enable, disable or query the status of the specified command.
+
+### `/raiseshields`
+
+Used to make the OP players impervious to damage and facilitate unhindered moderation.
+
+- Alias[es] `/redalert, /shieldsup`
+- Permission: OP
 
 ### About the permissions
 

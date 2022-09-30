@@ -1,23 +1,37 @@
 package miner82.bananosuite.events;
 
-import miner82.bananosuite.DB;
-import miner82.bananosuite.classes.DeathInsuranceOption;
-import miner82.bananosuite.classes.DeathInsurancePremiumCalculator;
+import miner82.bananosuite.BananoSuitePlugin;
+import miner82.bananosuite.classes.*;
 import miner82.bananosuite.configuration.ConfigEngine;
+import miner82.bananosuite.interfaces.IDBConnection;
+import miner82.bananosuite.runnables.PaymentProcessor;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.economy.EconomyResponse;
 import org.bukkit.ChatColor;
+import org.bukkit.Color;
+import org.bukkit.FireworkEffect;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.FireworkMeta;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Random;
 
 public class OnPlayerDeathEvent implements Listener {
 
+    private final IDBConnection db;
     private final ConfigEngine configEngine;
     private final Economy econ;
 
-    public OnPlayerDeathEvent(ConfigEngine configEngine, Economy econ) {
+    public OnPlayerDeathEvent(IDBConnection db, ConfigEngine configEngine, Economy econ) {
+        this.db = db;
         this.configEngine = configEngine;
         this.econ = econ;
     }
@@ -31,89 +45,114 @@ public class OnPlayerDeathEvent implements Listener {
 
         Player player = args.getEntity();
 
-        DeathInsuranceOption insuranceOption = DB.getPlayerDeathInsurance(player);
+        try {
 
-        if(insuranceOption != DeathInsuranceOption.None) {
+            PlayerRecord playerRecord = this.db.getPlayerRecord(player);
 
-            // Calculate the insurance amount
-            double basePremium = this.configEngine.getBaseDeathInsurancePremium();
-            double insuranceFee = DeathInsurancePremiumCalculator.CalculateNextPremium(this.configEngine, player, insuranceOption);
-            double feePaid = 0;
-            String errorMessage = "";
-            boolean activateDeathInsurance = false;
+            if (playerRecord == null) {
 
-            if(basePremium > 0
-                  && insuranceFee == 0) {
-
-                player.sendMessage(ChatColor.GOLD + "Your first death insurance premium each week is free. Thanks for being a citizen!");
-                activateDeathInsurance = true;
+                return;
 
             }
 
-            if(insuranceFee > 0) {
+            DeathInsuranceOption insuranceOption = playerRecord.getDeathInsuranceOption();
 
-                if (econ.has(player, insuranceFee)) {
+            if (insuranceOption != DeathInsuranceOption.None) {
 
-                    try {
+                // Calculate the insurance amount
+                double basePremium = this.configEngine.getBaseDeathInsurancePremium();
+                double premium = DeathInsuranceManager.CalculateNextPremium(this.db, this.configEngine, playerRecord, insuranceOption);
+                double feePaid = 0;
+                String errorMessage = "";
+                boolean activateDeathInsurance = false;
 
-                        EconomyResponse r = econ.withdrawPlayer(player, insuranceFee);
-                        boolean success = r.transactionSuccess();
-                        feePaid = r.amount;
+                if (basePremium > 0
+                        && premium == 0) {
 
-                        if (!success) {
+                    player.sendMessage(ChatColor.GOLD + "Your first death insurance premium each week is free. Thanks for being a citizen!");
+                    activateDeathInsurance = true;
 
-                            feePaid = 0;
-                            player.sendMessage(ChatColor.RED + "Your insurance premium of " + econ.format(insuranceFee) + " could not be collected because the transaction failed! " + r.errorMessage);
-                            player.sendMessage(ChatColor.RED + "Your policy will be honoured, but we hope you will send the fee to the server donation address in due course :-)");
+                }
 
-                            System.out.println("[" + player.getName() + "] Insurance premium of " + econ.format(insuranceFee) + " could not be paid: " + r.errorMessage);
+                if (premium > 0) {
 
-                            errorMessage = r.errorMessage;
+                    if (econ.has(player, premium)) {
 
-                        }
+                        new PaymentProcessor(econ,
+                                player,
+                                premium,
+                                new HashMap<String,Object>(),
+                                this::DeathInsuranceCallback)
+                                .runTaskAsynchronously(BananoSuitePlugin.getPlugin(BananoSuitePlugin.class));
 
                         activateDeathInsurance = true;
 
-                    } catch (Exception e) {
-                        System.out.println("[" + player.getName() + "] Insurance premium of " + econ.format(insuranceFee) + " could not be paid: " + e.getMessage());
-                        errorMessage = e.getMessage();
+                    } else {
+
+                        player.sendMessage(ChatColor.RED + "Your balance is insufficient to cover your Death Insurance Premium!");
+
+                        return;
+
                     }
 
-                } else {
-
-                    player.sendMessage(ChatColor.RED + "Your balance is insufficient to cover your Death Insurance Premium!");
-
-                    return;
-
                 }
 
+                if (activateDeathInsurance) {
+
+                    playerRecord.setLastDIPolicyUsage(LocalDateTime.now());
+
+                    db.save(playerRecord);
+                    db.recordPlayerInsuredDeath(player, insuranceOption, feePaid, premium, args.getDeathMessage(), errorMessage);
+
+                    args.setKeepInventory(true);
+                    args.getDrops().clear();
+
+                    if (insuranceOption == DeathInsuranceOption.Full) {
+
+                        args.setKeepLevel(true);
+                        args.setDroppedExp(0);
+
+                    }
+
+                    args.setDeathMessage(player.getDisplayName() + " was saved from an excruciating death by Death Insurance!");
+
+                    player.sendMessage(ChatColor.AQUA + "Your next insurance premium will cost " + econ.format(DeathInsuranceManager.CalculateNextPremium(this.db, this.configEngine, playerRecord, insuranceOption)) + " and the cost will increase based on the number of deaths in a 24 hour period.");
+
+                    if (econ.getBalance(player) < DeathInsuranceManager.CalculateNextPremium(this.db, this.configEngine, playerRecord, insuranceOption)) {
+
+                        player.sendMessage(ChatColor.GOLD + "Your balance is low and may not cover your next Death Insurance premium!");
+
+                    }
+
+                }
             }
 
-            if(activateDeathInsurance) {
+        }
+        catch (Exception ex) {
 
-                DB.recordPlayerInsuredDeath(player, insuranceOption, feePaid, insuranceFee, args.getDeathMessage(), errorMessage);
+            ex.printStackTrace();
 
-                args.setKeepInventory(true);
-                args.getDrops().clear();
+        }
 
-                if (insuranceOption == DeathInsuranceOption.Full) {
+    }
 
-                    args.setKeepLevel(true);
-                    args.setDroppedExp(0);
+    private void DeathInsuranceCallback(PaymentCallbackParameters parameters) {
 
-                }
+        Player player = parameters.getSender();
+        double premium = parameters.getAmount();
 
-                args.setDeathMessage(player.getDisplayName() + " was saved from an excruciating death by Death Insurance!");
+        if(parameters.getTransactionWasSuccessful()) {
 
-                player.sendMessage(ChatColor.AQUA + "Your next insurance premium will cost " + econ.format(DeathInsurancePremiumCalculator.CalculateNextPremium(this.configEngine, player, insuranceOption)) + " and the cost will increase based on the number of deaths in a 24 hour period.");
+            player.sendMessage(ChatColor.GREEN + "Your insurance premium of " + econ.format(premium) + " was collected successfully. Thank you!");
 
-                if (econ.getBalance(player) < DeathInsurancePremiumCalculator.CalculateNextPremium(this.configEngine, player, insuranceOption)) {
+        }
+        else {
 
-                    player.sendMessage(ChatColor.GOLD + "Your balance is low and may not cover your next Death Insurance premium!");
+            player.sendMessage(ChatColor.RED + "Your insurance premium of " + econ.format(premium) + " could not be collected because the transaction failed! " + parameters.getTransactionError());
+            player.sendMessage(ChatColor.RED + "Your policy will be honoured, but we hope you will send the premium fee to the server donation address in due course :-)");
 
-                }
+            System.out.println("[" + player.getName() + "] Insurance premium of " + econ.format(premium) + " could not be paid: " + parameters.getTransactionError());
 
-            }
         }
 
     }

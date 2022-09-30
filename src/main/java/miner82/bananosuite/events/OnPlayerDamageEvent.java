@@ -1,6 +1,7 @@
 package miner82.bananosuite.events;
 
-import miner82.bananosuite.DB;
+import miner82.bananosuite.classes.PlayerRecord;
+import miner82.bananosuite.interfaces.IDBConnection;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
@@ -9,6 +10,11 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 
 public class OnPlayerDamageEvent implements Listener {
 
+    private final IDBConnection db;
+
+    public OnPlayerDamageEvent(IDBConnection db) {
+        this.db = db;
+    }
 
     @EventHandler
     public void onPlayerDamage(EntityDamageByEntityEvent args) {
@@ -41,8 +47,18 @@ public class OnPlayerDamageEvent implements Listener {
                 Player taker = (Player) args.getEntity();
                 Player damagerPlayer = (Player) args.getDamager();
 
-                boolean takerOptedOut = !DB.getPlayerPvPOptIn(taker);
-                boolean damagerOptedOut = !DB.getPlayerPvPOptIn(damagerPlayer);
+                PlayerRecord takerRecord = db.getPlayerRecord(taker);
+                PlayerRecord damagerRecord = db.getPlayerRecord(damagerPlayer);
+
+                if(takerRecord == null
+                     || damagerRecord == null) {
+
+                    return;
+
+                }
+
+                boolean takerOptedOut = !takerRecord.isPvpOptedIn();
+                boolean damagerOptedOut = !damagerRecord.isPvpOptedIn();
 
                 if ((takerOptedOut || damagerOptedOut)
                         && !taker.equals(damagerPlayer)) {
@@ -60,6 +76,7 @@ public class OnPlayerDamageEvent implements Listener {
                         damagerPlayer.sendMessage(ChatColor.LIGHT_PURPLE + "You are opted-out for PvP!");
 
                     }
+
                 }
 
             }
@@ -67,4 +84,5 @@ public class OnPlayerDamageEvent implements Listener {
         }
 
     }
+
 }

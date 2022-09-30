@@ -1,6 +1,8 @@
 package miner82.bananosuite.commands;
 
-import miner82.bananosuite.Main;
+import miner82.bananosuite.BananoSuitePlugin;
+import miner82.bananosuite.classes.DistanceCalculator;
+import miner82.bananosuite.classes.EssentialsAfkChecker;
 import miner82.bananosuite.classes.PaymentCallbackParameters;
 import miner82.bananosuite.runnables.PaymentProcessor;
 import miner82.bananosuite.configuration.ConfigEngine;
@@ -21,8 +23,8 @@ public class RainCommand extends BaseCommand implements CommandExecutor {
 
     private final String KEY_RECIPIENTS = "Recipients";
 
-    private Economy econ;
-    private ConfigEngine configEngine;
+    private final Economy econ;
+    private final ConfigEngine configEngine;
 
     public RainCommand(ConfigEngine configEngine, Economy econ) {
         this.configEngine = configEngine;
@@ -59,8 +61,32 @@ public class RainCommand extends BaseCommand implements CommandExecutor {
 
         // Process the rain!
         try {
+
             final double rainAmount = Double.parseDouble(args[0]);
-            Object[] onlinePlayers = Bukkit.getOnlinePlayers().stream().filter(x -> !x.equals(player)).toArray();
+            Object[] onlinePlayers;
+
+            if(args.length > 1
+                 && args[1].equalsIgnoreCase("nearby")) {
+
+                final int distance = tryParseInt(args[2], 64);
+
+                onlinePlayers = Bukkit.getOnlinePlayers().stream()
+                                                         .filter(x -> !x.equals(player)
+                                                                        && !EssentialsAfkChecker.checkPlayerEssentialsIsAfk(player)
+                                                                        && x.getWorld().getEnvironment() == player.getWorld().getEnvironment()
+                                                                        && DistanceCalculator.calculateDistance(player.getLocation(), x.getLocation()) < (double)distance)
+                                                         .toArray();
+
+            }
+            else {
+
+                onlinePlayers = Bukkit.getOnlinePlayers().stream()
+                                                         .filter(x -> !x.equals(player)
+                                                                        && !EssentialsAfkChecker.checkPlayerEssentialsIsAfk(player)).toArray();
+
+            }
+
+
             int playersOnline = onlinePlayers.length;
             boolean testmode = false;
 
@@ -114,7 +140,7 @@ public class RainCommand extends BaseCommand implements CommandExecutor {
                 Bukkit.broadcastMessage(ChatColor.GOLD + "Hmm, it's beginning to look like rain...");
 
                 new PaymentProcessor(econ, player, totalRain, params, this::RainCallback)
-                        .runTaskAsynchronously(Main.getPlugin(Main.class));
+                        .runTaskAsynchronously(BananoSuitePlugin.getPlugin(BananoSuitePlugin.class));
 
             }
             else {
@@ -177,54 +203,48 @@ public class RainCommand extends BaseCommand implements CommandExecutor {
 
         final double rainPerPlayer = totalRain / recipients.length;
 
-        if(econ.has(player, totalRain)) {
+        if(parameters.getTransactionWasSuccessful()) {
 
-            EconomyResponse response = econ.withdrawPlayer(player, totalRain);
+            SendMessage( player, "Thank you for your rain of " + econ.format(totalRain) + ".", ChatColor.GREEN);
+            SendMessage( player, "This will be shared out as " + econ.format(rainPerPlayer) + " for each online player!", ChatColor.GREEN);
 
-            if(response.transactionSuccess()) {
+            for (Object recipient : recipients) {
 
-                SendMessage( player, "Thank you for your rain of " + econ.format(totalRain) + ".", ChatColor.GREEN);
-                SendMessage( player, "This will be shared out as " + econ.format(rainPerPlayer) + " for each online player!", ChatColor.GREEN);
+                new BukkitRunnable() {
 
-                for (Object recipient : recipients) {
+                    @Override
+                    public void run() {
 
-                    new BukkitRunnable() {
+                        try {
 
-                        @Override
-                        public void run() {
+                            if(recipient instanceof Player) {
 
-                            try {
+                                Player recipientPlayer = (Player)recipient;
 
-                                if(recipient instanceof Player) {
+                                if(!recipientPlayer.getUniqueId().equals(player.getUniqueId())) {
 
-                                    Player recipientPlayer = (Player)recipient;
+                                    EconomyResponse rainDeposit = econ.depositPlayer(recipientPlayer, rainPerPlayer);
 
-                                    if(!recipientPlayer.getUniqueId().equals(player.getUniqueId())) {
+                                    if (rainDeposit.transactionSuccess()) {
 
-                                        EconomyResponse rainDeposit = econ.depositPlayer(recipientPlayer, rainPerPlayer);
-
-                                        if (rainDeposit.transactionSuccess()) {
-
-                                            SendMessage(recipientPlayer, "You have received " + econ.format(rainPerPlayer) + " as part of a rain from " + player.getDisplayName() + "!", ChatColor.GOLD);
-                                            SendMessage(player, recipientPlayer.getDisplayName() + " has been sent " + econ.format(rainPerPlayer) + " from your rain!", ChatColor.GOLD);
-
-                                        }
+                                        SendMessage(recipientPlayer, "You have received " + econ.format(rainPerPlayer) + " as part of a rain from " + player.getDisplayName() + "!", ChatColor.GOLD);
+                                        SendMessage(player, recipientPlayer.getDisplayName() + " has been sent " + econ.format(rainPerPlayer) + " from your rain!", ChatColor.GOLD);
 
                                     }
 
                                 }
 
                             }
-                            catch (Exception e) {
-                                e.printStackTrace();
-                            }
 
                         }
+                        catch (Exception e) {
+                            e.printStackTrace();
+                        }
 
-                    }.runTaskAsynchronously(Main.getPlugin(Main.class));
+                    }
 
+                }.runTaskAsynchronously(BananoSuitePlugin.getPlugin(BananoSuitePlugin.class));
 
-                }
 
             }
 
@@ -234,6 +254,20 @@ public class RainCommand extends BaseCommand implements CommandExecutor {
             SendMessage( player, "We appreciate the gesture, but you don't have enough " + econ.currencyNamePlural() + " to do that.", ChatColor.RED);
 
         }
+    }
+
+    private int tryParseInt(String value, int defaultVal) {
+
+        try {
+
+            return Integer.parseInt(value);
+
+        } catch (NumberFormatException e) {
+
+            return defaultVal;
+
+        }
+
     }
 
 }

@@ -1,10 +1,12 @@
 package miner82.bananosuite.commands;
 
-import miner82.bananosuite.DB;
 import miner82.bananosuite.classes.DistanceCalculator;
+import miner82.bananosuite.classes.Math;
+import miner82.bananosuite.classes.PlayerRecord;
 import miner82.bananosuite.classes.TeleportLocationMaker;
 import miner82.bananosuite.classes.TeleportPremiumCalculator;
 import miner82.bananosuite.configuration.ConfigEngine;
+import miner82.bananosuite.interfaces.IDBConnection;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.economy.EconomyResponse;
 import org.bukkit.Bukkit;
@@ -20,14 +22,16 @@ import org.bukkit.util.Vector;
 
 import java.util.Optional;
 
-public class TeleportCommand extends BaseCommand implements CommandExecutor {
+public class TeleportCommand extends BaseTeleportCommand implements CommandExecutor {
 
     private final String KEY_DESTINATION = "destination";
 
-    private Economy econ;
-    private ConfigEngine configEngine;
+    private final IDBConnection db;
+    private final Economy econ;
+    private final ConfigEngine configEngine;
 
-    public TeleportCommand(ConfigEngine configEngine, Economy econ) {
+    public TeleportCommand(IDBConnection db, ConfigEngine configEngine, Economy econ) {
+        this.db = db;
         this.configEngine = configEngine;
         this.econ = econ;
     }
@@ -67,6 +71,9 @@ public class TeleportCommand extends BaseCommand implements CommandExecutor {
 
         // Process the teleport fee
         try {
+
+            PlayerRecord playerRecord = db.getPlayerRecord(player);
+
             // Calculate the distance
             Optional<World> world = Bukkit.getWorlds().stream().filter(x -> x.getEnvironment().equals(World.Environment.NORMAL)).findFirst();
 
@@ -83,7 +90,7 @@ public class TeleportCommand extends BaseCommand implements CommandExecutor {
             }
             else if(args[0].equalsIgnoreCase("HOME")) {
 
-                destination = DB.getPlayerHomeLocation(player);
+                destination = playerRecord.getHomeLocation();
 
             }
 
@@ -101,7 +108,8 @@ public class TeleportCommand extends BaseCommand implements CommandExecutor {
 
                 if(this.configEngine.getIsSpawnTeleportFree()) {
 
-                    player.teleport(destination, PlayerTeleportEvent.TeleportCause.COMMAND);
+                    teleportPlayer(player, destination);
+                    SendMessage(player, "You have not been charged for this teleport. Spawn teleports are currently free!", ChatColor.GOLD);
 
                     return true;
 
@@ -114,7 +122,27 @@ public class TeleportCommand extends BaseCommand implements CommandExecutor {
 
                 if(distance > minimumTeleportDistance) {
 
-                    double teleportCost = TeleportPremiumCalculator.calculateTeleportCost(this.configEngine, currentLocation, destination);
+                    double teleportCost;
+
+                    // OPs are putting in the hard work without any remuneration. Let's reward them.
+                    if(player.isOp()) {
+
+                        teleportCost = 0;
+
+                    }
+                    else {
+
+                        teleportCost = TeleportPremiumCalculator.calculateTeleportCost(this.configEngine, currentLocation, destination);
+
+                        // Give a citizen/special discount for players with a rank with perks.
+                        if(playerRecord != null
+                             && playerRecord.getPlayerRank().getPerks()) {
+
+                            teleportCost = Math.Round(teleportCost * 0.75, 2);
+
+                        }
+
+                    }
 
                     if(quote) {
 
@@ -133,23 +161,7 @@ public class TeleportCommand extends BaseCommand implements CommandExecutor {
 
                             if (response.transactionSuccess()) {
 
-                                if (!destination.getChunk().isLoaded()) {
-                                    destination.getChunk().load();
-                                }
-
-                                player.setGravity(false);
-
-                                if(player.isFlying()) {
-
-                                    player.setFlySpeed(0);
-                                    player.setGliding(false);
-
-                                }
-
-                                player.setVelocity(new Vector(0,0,0));
-                                player.teleport(destination, PlayerTeleportEvent.TeleportCause.COMMAND);
-
-                                player.setGravity(true);
+                                teleportPlayer(player, destination);
 
                                 SendMessage(player, "Your teleport request has been completed and " + econ.format(teleportCost) + " has been deducted from your balance.", ChatColor.GREEN);
 
@@ -187,9 +199,11 @@ public class TeleportCommand extends BaseCommand implements CommandExecutor {
 
         }
         catch (NumberFormatException ex) {
+
             SendMessage( player, "A properly formatted decimal value must be provided!", ChatColor.RED);
 
             return false;
+
         }
 
         return true;

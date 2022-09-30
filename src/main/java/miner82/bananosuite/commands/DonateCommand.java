@@ -1,9 +1,9 @@
 package miner82.bananosuite.commands;
 
-import miner82.bananosuite.DB;
-import miner82.bananosuite.Main;
+import miner82.bananosuite.BananoSuitePlugin;
 import miner82.bananosuite.classes.*;
 import miner82.bananosuite.configuration.ConfigEngine;
+import miner82.bananosuite.interfaces.IDBConnection;
 import miner82.bananosuite.runnables.PaymentProcessor;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.ChatColor;
@@ -24,10 +24,12 @@ import java.util.Random;
 
 public class DonateCommand extends BaseCommand implements CommandExecutor {
 
-    private Economy econ;
-    private ConfigEngine configEngine;
+    private final IDBConnection db;
+    private final Economy econ;
+    private final ConfigEngine configEngine;
 
-    public DonateCommand(ConfigEngine configEngine, Economy econ) {
+    public DonateCommand(IDBConnection db, ConfigEngine configEngine, Economy econ) {
+        this.db  = db;
         this.configEngine = configEngine;
         this.econ = econ;
     }
@@ -72,12 +74,14 @@ public class DonateCommand extends BaseCommand implements CommandExecutor {
 
             }
 
+            SendMessage( player, "Thanks! We're processing your donation of " + this.econ.format(donation) + ". This may take a moment.", ChatColor.GOLD);
+
             new PaymentProcessor(econ,
                                  player,
                                  donation,
                                  new HashMap<String,Object>(),
                                  this::DonationCallback)
-                  .runTaskAsynchronously(Main.getPlugin(Main.class));
+                  .runTaskAsynchronously(BananoSuitePlugin.getPlugin(BananoSuitePlugin.class));
 
         }
         catch (NumberFormatException ex) {
@@ -97,7 +101,7 @@ public class DonateCommand extends BaseCommand implements CommandExecutor {
 
         if(parameters.getTransactionWasSuccessful()) {
 
-            DB.recordPlayerDonation(donater, donation);
+            db.recordPlayerDonation(donater, donation);
 
             Random random = new Random();
             int randomQuantity = random.nextInt(15) + 1;

@@ -1,6 +1,5 @@
 package miner82.bananosuite.events;
 
-import miner82.bananosuite.configuration.ConfigEngine;
 import miner82.bananosuite.renderers.monKeyRenderer;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -15,12 +14,6 @@ import org.bukkit.map.MapRenderer;
 import org.bukkit.map.MapView;
 
 public class MapCloneEvent implements Listener {
-
-    private final ConfigEngine configEngine;
-
-    public MapCloneEvent(ConfigEngine configEngine) {
-        this.configEngine = configEngine;
-    }
 
     @EventHandler
     public void OnMapClone(PrepareItemCraftEvent args) {

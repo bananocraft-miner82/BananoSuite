@@ -1,9 +1,8 @@
 package miner82.bananosuite.configuration;
 
-import miner82.bananosuite.Main;
-import miner82.bananosuite.classes.DonationPrize;
-import miner82.bananosuite.classes.MonKeyType;
-import miner82.bananosuite.classes.PrizeClassification;
+import miner82.bananosuite.BananoSuitePlugin;
+import miner82.bananosuite.classes.*;
+import miner82.bananosuite.dbconnectors.DBConnectionType;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -13,13 +12,22 @@ import java.util.*;
 
 public class ConfigEngine {
 
-    private Main main;
+    private BananoSuitePlugin main;
 
     private List<PrizeClassification> prizeClassifications = new ArrayList<PrizeClassification>();
     private HashMap<PrizeClassification,List<DonationPrize>> donationPrizes = new HashMap<>();
     private HashMap<String,String> availableFrames = new HashMap<>();
 
     private boolean enablePlugin = true;
+
+    private String mongoDbConnectionString = "";
+    private DBConnectionType connectionType = DBConnectionType.Json;
+
+    private String mysqlServerName = "";
+    private int mysqlPort = 3306;
+    private String mysqlDatabaseName = "";
+    private String mysqlUsername = "";
+    private String mysqlPassword = "";
 
     private boolean donateCommandEnabled = true;
     private boolean monkeyMapsEnabled = true;
@@ -46,7 +54,6 @@ public class ConfigEngine {
     private double donationFireworksThreshold = 6.9;
     private boolean donationRandomGift = true;
 
-    private String mongoURI = "";
     private String monKeyImageSourceURL = "https://monkey.banano.cc/api/v1/monkey/{address}?format=png&size=128&background=true";
 
     private String imageDirectory = "images";
@@ -58,12 +65,40 @@ public class ConfigEngine {
     private double monKeyPrice = 100;
     private double qrPrice = 250;
 
-    public ConfigEngine(Main main) {
+    public ConfigEngine(BananoSuitePlugin main) {
 
         this.main = main;
 
         initialiseConfig(main.getConfig());
 
+    }
+
+    public DBConnectionType getConnectionType() {
+        return this.connectionType;
+    }
+
+    public String getMongoDbConnectionString() {
+        return this.mongoDbConnectionString;
+    }
+
+    public String getMysqlServerName() {
+        return this.mysqlServerName;
+    }
+
+    public int getMysqlPort() {
+        return this.mysqlPort;
+    }
+
+    public String getMysqlDatabaseName() {
+        return this.mysqlDatabaseName;
+    }
+
+    public String getMysqlUsername() {
+        return this.mysqlUsername;
+    }
+
+    public String getMysqlPassword() {
+        return this.mysqlPassword;
     }
 
     public boolean getIsEnabled() {
@@ -526,7 +561,7 @@ public class ConfigEngine {
         config.set("TeleportMaximumPremium", this.teleportMaximumCost);
         config.set("TeleportGrowthRate", this.teleportGrowthRate);
         config.set("MinimumTeleportDistance", this.minimumTeleportDistance);
-        config.set("mongoURI", this.imageDirectory);
+        config.set("ImageDirectory", this.imageDirectory);
         config.set("monKeyImageSourceURL", this.monKeyImageSourceURL);
         config.set("MinimumRainPerPlayer", this.minimumRainPerPlayer);
 
@@ -543,6 +578,7 @@ public class ConfigEngine {
     }
 
     public void reload() {
+        main.reloadConfig();
         initialiseConfig(main.getConfig());
     }
 
@@ -565,6 +601,37 @@ public class ConfigEngine {
             }
 
             setIsEnabled(true);
+
+            if(configuration.contains("mongoURI")
+                    && configuration.getString("mongoURI").length() > 0) {
+
+                this.mongoDbConnectionString = configuration.getString("mongoURI");
+                this.connectionType = DBConnectionType.MongoDB;
+
+                System.out.println("MongoDB connection details identified!");
+
+            }
+            else if(configuration.contains("mysqlServerName")
+                    && configuration.getString("mysqlServerName").length() > 0) {
+
+                this.mysqlServerName = configuration.getString("mysqlServerName");
+                this.mysqlPort = configuration.getInt("mysqlPort");
+                this.mysqlDatabaseName = configuration.getString("mysqlDatabaseName");
+                this.mysqlUsername = configuration.getString("mysqlUsername");
+                this.mysqlPassword = configuration.getString("mysqlPassword");
+                this.connectionType = DBConnectionType.MySQL;
+
+                System.out.println("MySQL connection details identified!");
+
+            }
+            else {
+
+                this.mongoDbConnectionString = "";
+                this.connectionType = DBConnectionType.Json;
+
+                System.out.println("No connection details identified! Using Json default...");
+
+            }
 
             donateCommandEnabled = configuration.getBoolean("EnableDonateCommand");
             System.out.println("- Donate Command: " + (donateCommandEnabled ? "Active" : "Deactivated"));

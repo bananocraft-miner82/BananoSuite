@@ -1,5 +1,6 @@
-package miner82.bananosuite.tabcompleters;
+package miner82.bananosuite.commands.tabcompleters;
 
+import miner82.bananosuite.configuration.ConfigEngine;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
@@ -8,10 +9,11 @@ import org.bukkit.util.StringUtil;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TeleportCommandTabCompleter implements TabCompleter {
+public class PvPOptInOutTabCompleter implements TabCompleter {
+    private ConfigEngine configEngine;
 
-    public TeleportCommandTabCompleter() {
-
+    public PvPOptInOutTabCompleter(ConfigEngine configEngine) {
+        this.configEngine = configEngine;
     }
 
     @Override
@@ -21,13 +23,9 @@ public class TeleportCommandTabCompleter implements TabCompleter {
 
         if(args.length == 1) {
 
-            results.add("HOME");
-            results.add("SPAWN");
-
-        }
-        else if(args.length == 2) {
-
-            results.add("QUOTE");
+            results.add("PVPOFF");
+            results.add("PVPON");
+            results.add("QUERY");
 
         }
 

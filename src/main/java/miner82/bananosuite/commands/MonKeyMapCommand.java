@@ -1,13 +1,14 @@
 package miner82.bananosuite.commands;
 
-import miner82.bananosuite.DB;
+import miner82.bananosuite.BananoSuitePlugin;
+import miner82.bananosuite.classes.MonKeyMapStatus;
+import miner82.bananosuite.classes.MonkeyMap;
 import miner82.bananosuite.configuration.ConfigEngine;
-import miner82.bananosuite.io.FileManager;
-import miner82.bananosuite.io.ImageManager;
+import miner82.bananosuite.interfaces.IDBConnection;
 import miner82.bananosuite.classes.MonKeyType;
 import miner82.bananosuite.renderers.monKeyRenderer;
+import miner82.bananosuite.runnables.MonKeyMapRunnable;
 import net.milkbowl.vault.economy.Economy;
-import net.milkbowl.vault.economy.EconomyResponse;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -20,24 +21,28 @@ import org.bukkit.inventory.meta.MapMeta;
 import org.bukkit.map.MapRenderer;
 import org.bukkit.map.MapView;
 
-import javax.imageio.ImageIO;
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 
 
 public class MonKeyMapCommand extends BaseCommand implements CommandExecutor {
 
-    private final String WALLET_ADDRESS = "WalletAddress";
-    private final String MAP_TYPE = "MapType";
-    private final String INCLUDE_FRAME = "IncludeFrame";
+    private final int ARG_COMMAND = 0;
+    private final int ARG_MAPTYPE = 1;
+    private final int ARG_ADDRESS = 2;
+    private final int ARG_MONKEY_FRAME = 3;
+    private final int ARG_QRCODE_ADDITIONAL = 3;
+    private final int ARG_MONKEY_ADDITIONAL = 4;
 
-    private ConfigEngine configEngine;
-    private Economy econ;
+    private final BananoSuitePlugin plugin;
+    private final IDBConnection db;
+    private final ConfigEngine configEngine;
+    private final Economy econ;
 
-    public MonKeyMapCommand(ConfigEngine configEngine, Economy econ) {
+    public MonKeyMapCommand(BananoSuitePlugin plugin, IDBConnection db, ConfigEngine configEngine, Economy econ) {
+        this.plugin = plugin;
+        this.db = db;
         this.configEngine = configEngine;
         this.econ = econ;
     }
@@ -45,11 +50,10 @@ public class MonKeyMapCommand extends BaseCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 
-        if (sender instanceof Player)
-        {
+        if (sender instanceof Player) {
             Player player = (Player) sender;
 
-            if(!this.configEngine.getIsEnabled()
+            if (!this.configEngine.getIsEnabled()
                     || !this.configEngine.getMonkeyMapsEnabled()) {
 
                 SendMessage(player, "That command is not enabled on this server.", ChatColor.GOLD);
@@ -58,8 +62,15 @@ public class MonKeyMapCommand extends BaseCommand implements CommandExecutor {
 
             }
 
-            if(args.length > 0
-                 && args[0].equalsIgnoreCase("help")) {
+            if (args.length == 0) {
+
+                SendMessage(player, "Arguments must be provided to use this command!", ChatColor.RED);
+
+                return false;
+
+            }
+
+            if (args[ARG_COMMAND].equalsIgnoreCase("help")) {
 
                 SendMessage(player, "MonKeyMaps come in two varieties: QR Codes and MonKeys.", ChatColor.GOLD);
                 SendMessage(player, "QR Codes are generated using the address you provide, with any text after replacing your name. These cost " + econ.format(this.configEngine.getMapPrice(MonKeyType.QRCode)) + ".", ChatColor.GOLD);
@@ -68,228 +79,203 @@ public class MonKeyMapCommand extends BaseCommand implements CommandExecutor {
                 return true;
 
             }
+            else if (args[ARG_COMMAND].equalsIgnoreCase("buy")) {
 
-            System.out.println("Player has permission. Commencing image retrieval...");
-
-            if (args.length >= 2
-                    && (args[0].equalsIgnoreCase("monkey") || args[0].equalsIgnoreCase("qrcode"))
-                    && args[1].startsWith("ban_")) {
-
-                MonKeyType mapType = args[0].equalsIgnoreCase("qrcode") ? MonKeyType.QRCode : MonKeyType.MonKey;
-                String address = args[1].toLowerCase(Locale.ROOT).trim();
+                MonKeyType mapType = args[ARG_MAPTYPE].equalsIgnoreCase("qrcode") ? MonKeyType.QRCode : MonKeyType.MonKey;
+                String walletAddress = args[ARG_ADDRESS].toLowerCase(Locale.ROOT).trim();
                 String frameKey = "";
+                String textOverride = "";
 
-                if(mapType == MonKeyType.MonKey
-                        && args.length >= 3
-                        && !args[2].equalsIgnoreCase("none")) {
+                if (mapType == MonKeyType.MonKey) {
 
-                    frameKey = args[2];
+                    if(args.length >= ARG_MONKEY_FRAME
+                            && !args[ARG_MONKEY_FRAME].equalsIgnoreCase("none")) {
 
-                }
+                        frameKey = args[ARG_MONKEY_FRAME];
 
-                // Process the payment
-                double requiredPayment = this.configEngine.getMapPrice(mapType);
+                    }
 
-                if(player.isOp()) {
-                    requiredPayment = 0;
-                }
+                    if(args.length > ARG_MONKEY_ADDITIONAL
+                            && args[ARG_MONKEY_ADDITIONAL].length() > 0) {
 
-                if(requiredPayment > 0
-                      && !econ.has(player, requiredPayment)) {
+                        for (int index = ARG_MONKEY_ADDITIONAL; index < args.length; index++) {
 
-                    player.sendMessage(ChatColor.RED + "You do not have sufficient funds for this purchase! You need " + econ.format(requiredPayment) + " and you have " + econ.format(econ.getBalance(player)) + ".");
-                    return false;
-
-                }
-
-                System.out.println("Requested: " + mapType.toString() + " [" + address + "]");
-
-                // override it for now:
-                //address = "ban_1bananoo34ofbo8famhsj9e88um3j5xsa5f9sx457bxc8m1awnw4mmes8s1e";
-
-                // Download the image first - let's make sure we can get it
-                String monKeyURL = this.configEngine.getMonKeyImageSourceURL(address);
-
-                System.out.println("MonkeyURL: " + monKeyURL);
-
-                String destinationDirectory = this.configEngine.getAbsoluteDataDirectoryPath(mapType);
-
-                System.out.println("Destination Directory: " + destinationDirectory);
-
-                String fileName = FileManager.getUniqueFilename(destinationDirectory, "png");
-                System.out.println("Filename: " + fileName);
-
-                String fullDestinationName = destinationDirectory + fileName;
-                System.out.println("Full Destination: " + fullDestinationName);
-
-                try {
-                    File outputFile = new File(fullDestinationName);
-                    BufferedImage image;
-
-                    if(mapType == MonKeyType.MonKey) {
-
-                        System.out.println("Attempting MonKey download...");
-
-                        FileManager.downloadFile(monKeyURL, fullDestinationName);
-
-                        image = ImageManager.resizeImage(ImageIO.read(outputFile), 128, 128);
-
-                        if(this.configEngine.getAvailableFrames().containsKey(frameKey)) {
-
-                            try {
-                                String frameImageFileName =  this.configEngine.getAvailableFrames().getOrDefault(frameKey, "");
-
-                                if(frameImageFileName != "") {
-
-                                    File frameFile = new File(this.configEngine.getMonKeyFrameDirectoryPath() + frameImageFileName);
-                                    BufferedImage frame = ImageIO.read(frameFile);
-
-                                    Graphics g = image.getGraphics();
-                                    g.drawImage(frame, 0, 0, null);
-
-                                }
-
-                            } catch (Exception ex) {
-                                ex.printStackTrace();
-                            }
+                            textOverride += " " + args[index];
 
                         }
+
+                        textOverride = textOverride.trim();
+
+                    }
+
+                }
+                else if (mapType == MonKeyType.QRCode) {
+
+                    if(args.length > ARG_QRCODE_ADDITIONAL) {
+
+                        for (int index = ARG_QRCODE_ADDITIONAL; index < args.length; index++) {
+
+                            textOverride += " " + args[index];
+
+                        }
+
+                        textOverride = textOverride.trim();
 
                     }
                     else {
 
-                        image = ImageManager.generateQRCodeImage(address);
-
-                        Graphics2D gO = image.createGraphics();
-                        gO.setColor(Color.BLUE);
-                        gO.setFont(new Font( "SansSerif", Font.BOLD, 12 ));
-
-                        if(args.length >= 3) {
-
-                            String text = "";
-
-                            for(int index = 2; index < args.length; index++) {
-
-                                text += " " + args[index];
-
-                            }
-
-                            if(text.trim().length() == 0) {
-                                text = player.getName();
-                            }
-
-                            gO.drawString(text.trim(), 5, 126);
-
-                        }
-                        else {
-                            gO.drawString(player.getName(), 5, 126);
-                        }
-                    }
-
-                    ImageIO.write(image, "png", outputFile);
-                }
-                catch (IOException ex) {
-                    System.out.println("Error downloading monKey: " + address + System.lineSeparator() + ex.toString());
-                    player.sendMessage(ChatColor.RED + "An error occurred retrieving your monKey! You have not been charged for this attempt.");
-                    return false;
-                } catch (Exception ex) {
-                    System.out.println("Error generating QR Code: " + address + System.lineSeparator() + ex.toString());
-                    player.sendMessage(ChatColor.RED + "An error occurred generating the image! You have not been charged for this attempt.");
-                    return false;
-                }
-
-                // PROCESS THE PAYMENT
-                boolean paymentSuccessful = false;
-
-                if(requiredPayment > 0) {
-
-                    try {
-                        EconomyResponse response = econ.withdrawPlayer(player, requiredPayment);
-
-                        if(response != null
-                             && response.transactionSuccess()) {
-
-                            paymentSuccessful = true;
-
-                        }
-                        else {
-
-                            paymentSuccessful = false;
-                            player.sendMessage(ChatColor.RED + "Payment failed! " + response.errorMessage);
-
-                        }
-
-                    }
-                    catch (Exception ex) {
-
-                        player.sendMessage(ChatColor.RED + "An error occurred while attempting to process your payment! " + ex.getMessage());
+                        textOverride = player.getName();
 
                     }
 
                 }
-                else {
 
-                    paymentSuccessful = true;
+                SendMessage(player, "Your MonKeyMap request is being processed...", ChatColor.GOLD);
 
-                }
-
-                if (paymentSuccessful) {
-
-                    System.out.println("Generating monKey: Provided address: " + address);
-                    //MapView mapView = Bukkit.createMap(player.getWorld());
-
-                    MapView mapView = Bukkit.createMap(player.getWorld());
-
-                    for(MapRenderer renderer : mapView.getRenderers()) {
-                        mapView.removeRenderer(renderer);
-                    }
-
-                    mapView.addRenderer(new monKeyRenderer(this.configEngine));
-
-                    DB.createMapRecord(mapView, player, mapType, fileName);
-
-                    ItemStack map = new ItemStack(Material.FILLED_MAP, 1);
-                    MapMeta meta = (MapMeta) map.getItemMeta();
-
-                    meta.setMapView(mapView);
-
-                    if(mapType == MonKeyType.QRCode) {
-                        meta.setDisplayName(player.getName() + "'s QR");
-                    }
-                    else {
-                        meta.setDisplayName(player.getName() + "'s MonKey");
-                    }
-                    map.setItemMeta(meta);
-
-                    player.getInventory().addItem(map);
-
-                    player.sendMessage(ChatColor.GOLD + "Your new map has been added to your inventory. Thank you for your purchase!");
-                }
-                else {
-                    // Delete the downloaded image
-                    File file = new File(fullDestinationName);
-
-                    try {
-                        if (file.exists()) {
-                            file.delete();
-                        }
-                    }
-                    catch (SecurityException ex) {
-
-                    }
-                }
-
+                new MonKeyMapRunnable(player, this.db, this.configEngine, this.econ, mapType, walletAddress, frameKey, textOverride)
+                        .runTaskAsynchronously(this.plugin);
 
                 return true;
 
-            } else {
+            }
+            else if (args[ARG_COMMAND].equalsIgnoreCase("query")) {
 
-                player.sendMessage(ChatColor.DARK_RED + "A Banano address (starting with ban_) must be provided!");
+                int mapCount = this.db.getUnfinishedMapCount(player);
+                int readyCount = this.db.getReadyForCollectionMapCount(player);
+
+                if (mapCount > 0) {
+
+                    SendMessage(player, "You have " + mapCount + " pending or processing maps.", ChatColor.GOLD);
+
+                    if(readyCount > 0) {
+                        SendMessage(player, "There are " + mapCount + " ready for collection.", ChatColor.GOLD);
+                    }
+
+                }
+                else {
+
+                    SendMessage(player, "You have no pending or processing maps.", ChatColor.GOLD);
+
+                }
 
             }
+            else if(args[ARG_COMMAND].equalsIgnoreCase("retry")) {
+
+                List<MonkeyMap> maps = db.getFailedMaps(player);
+
+                if (maps.size() > 0) {
+
+                    for (MonkeyMap monkeyMap : maps) {
+
+                        new MonKeyMapRunnable(player, this.db, this.configEngine, this.econ, monkeyMap)
+                                .runTaskAsynchronously(this.plugin);
+
+                    }
+
+                    SendMessage(player, "There were " + maps.size() + " that were resubmitted for processing. Separate notifications will be issued when these have been processed.", ChatColor.GOLD);
+
+                } else {
+
+                    SendMessage(player, "There are no maps awaiting processing.", ChatColor.GOLD);
+
+                }
+
+                return true;
+
+            }
+            else if (args[ARG_COMMAND].equalsIgnoreCase("collect")) {
+
+                /// Get the available maps pending collection for the player.
+                List<MonkeyMap> maps = db.getMapsForCollection(player);
+
+                if (maps.size() > 0) {
+
+                    for (MonkeyMap monkeyMap : maps) {
+
+                        try {
+
+                            MapView mapView = Bukkit.createMap(player.getWorld());
+
+                            for (MapRenderer renderer : mapView.getRenderers()) {
+
+                                mapView.removeRenderer(renderer);
+
+                            }
+
+                            mapView.addRenderer(new monKeyRenderer(this.db, this.configEngine));
+
+                            ItemStack map = new ItemStack(Material.FILLED_MAP, 1);
+                            MapMeta meta = (MapMeta) map.getItemMeta();
+
+                            meta.setMapView(mapView);
+
+                            if (monkeyMap.hasAdditionalText()) {
+
+                                meta.setDisplayName(monkeyMap.getAdditionalText());
+
+                            } else if (monkeyMap.getMapType() == MonKeyType.QRCode) {
+
+                                meta.setDisplayName(player.getName() + "'s QR");
+
+                            } else {
+
+                                meta.setDisplayName(player.getName() + "'s MonKey");
+
+                            }
+
+                            map.setItemMeta(meta);
+
+                            HashMap<Integer, ItemStack> failedItems = player.getInventory().addItem(map);
+
+                            if (!failedItems.isEmpty()) {
+
+                                for (ItemStack item : failedItems.values()) {
+
+                                    player.getWorld().dropItem(player.getLocation(), item);
+
+                                }
+
+
+                            }
+
+                            monkeyMap.setMapId(mapView.getId());
+                            monkeyMap.setStatus(MonKeyMapStatus.Complete);
+
+                            db.save(monkeyMap);
+
+                        }
+                        catch (Exception ex) {
+
+                            ex.printStackTrace();
+
+                        }
+
+                    }
+
+                    if (maps.size() == 1) {
+
+                        SendMessage(player, "Your new map has been added to your inventory. Thank you for your purchase!", ChatColor.GOLD);
+
+                    } else {
+
+                        SendMessage(player, "Your new maps have been added to your inventory. Thank you for your purchase!", ChatColor.GOLD);
+
+                    }
+
+                } else {
+
+                    SendMessage(player, "There are no maps awaiting collection.", ChatColor.GOLD);
+
+                }
+
+                return true;
+
+            }
+
         }
 
         return false;
+
     }
 
 }

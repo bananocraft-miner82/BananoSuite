@@ -26,7 +26,7 @@ public class HelpCommand extends BaseCommand implements CommandExecutor {
 
             // List the OP-only commands
             SendMessage(player, "Command Enable/Disable: Enable/disable commands.", ChatColor.YELLOW);
-            SendMessage(player, "/bananosuite [deathinsurance|donate|monkeymaps|pvptoggle|rain|teleport] [enable|disable|status]", ChatColor.GRAY);
+            SendMessage(player, "/bananosuite [reloadconfig|deathinsurance|donate|monkeymaps|pvptoggle|rain|teleport] [enable|disable|status]", ChatColor.GRAY);
 
         }
 
@@ -34,20 +34,7 @@ public class HelpCommand extends BaseCommand implements CommandExecutor {
         SendMessage(player, "/donate [amount]", ChatColor.GRAY);
 
         SendMessage(player, "Rain: Feeling generous? Drop some currency to the other online players.", ChatColor.YELLOW);
-        SendMessage(player, "/rain [amount]", ChatColor.GRAY);
-
-        if(player != null && player.isOp()) {
-
-            SendMessage(player, "/rain [amount] [optional:testmode]", ChatColor.GRAY);
-            SendMessage(player, "OR /makeitrain [amount] [optional:testmode]", ChatColor.GRAY);
-
-        }
-        else {
-
-            SendMessage(player, "/rain [amount]", ChatColor.GRAY);
-            SendMessage(player, "OR /makeitrain [amount]", ChatColor.GRAY);
-
-        }
+        SendMessage(player, "/rain [amount] [optional:everyone|nearby] [optional(nearby only):distance]", ChatColor.GRAY);
 
         //SendMessage(player, "PvP Toggle: Don't want to PvP? You can opt out! QUERY tells you your current PvP status.", ChatColor.YELLOW);
         //SendMessage(player, "/pvptoggle [PVPOFF|PVPON|QUERY]", ChatColor.GRAY);
@@ -77,7 +64,7 @@ public class HelpCommand extends BaseCommand implements CommandExecutor {
         SendMessage(player, "MAP COMMANDS", ChatColor.GOLD);
 
         SendMessage(player, "MonKey/QR Map: Buy a MonKey or QR Code Map. Ask your server OP for the costs!", ChatColor.YELLOW);
-        SendMessage(player, "/buymonkeymap [MonKey|QRCode] [Wallet Address] [Optional: Frame Type (MonKey Only, Server Configurable)]", ChatColor.GRAY);
+        SendMessage(player, "/monkeymap [buy|query|retry|collect] [MonKey|QRCode] [Wallet Address] [Optional: Frame Type (MonKey Only, Server Configurable)]", ChatColor.GRAY);
 
         return true;
 

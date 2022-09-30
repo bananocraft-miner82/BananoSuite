@@ -14,17 +14,15 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.event.player.PlayerTeleportEvent;
-import org.bukkit.util.Vector;
 
 import java.util.Optional;
 
-public class TeleportSpawnCommand extends BaseCommand implements CommandExecutor {
+public class TeleportSpawnCommand extends BaseTeleportCommand implements CommandExecutor {
 
     private final String KEY_DESTINATION = "destination";
 
-    private Economy econ;
-    private ConfigEngine configEngine;
+    private final Economy econ;
+    private final ConfigEngine configEngine;
 
     public TeleportSpawnCommand(ConfigEngine configEngine, Economy econ) {
         this.configEngine = configEngine;
@@ -88,9 +86,11 @@ public class TeleportSpawnCommand extends BaseCommand implements CommandExecutor
                 }
 
                 if(this.configEngine.getIsSpawnTeleportFree()) {
-                    player.teleport(destination, PlayerTeleportEvent.TeleportCause.COMMAND);
+
+                    teleportPlayer(player, destination);
 
                     return true;
+
                 }
 
                 Location currentLocation = player.getLocation();
@@ -119,23 +119,7 @@ public class TeleportSpawnCommand extends BaseCommand implements CommandExecutor
 
                             if (response.transactionSuccess()) {
 
-                                if (!destination.getChunk().isLoaded()) {
-                                    destination.getChunk().load();
-                                }
-
-                                player.setGravity(false);
-
-                                if(player.isFlying()) {
-
-                                    player.setFlySpeed(0);
-                                    player.setGliding(false);
-
-                                }
-
-                                player.setVelocity(new Vector(0,0,0));
-                                player.teleport(destination, PlayerTeleportEvent.TeleportCause.COMMAND);
-
-                                player.setGravity(true);
+                                teleportPlayer(player, destination);
 
                                 SendMessage(player, "Your teleport request has been completed and " + econ.format(teleportCost) + " has been deducted from your balance.", ChatColor.GREEN);
 
@@ -168,9 +152,11 @@ public class TeleportSpawnCommand extends BaseCommand implements CommandExecutor
 
         }
         catch (NumberFormatException ex) {
+
             SendMessage( player, "A properly formatted decimal value must be provided!", ChatColor.RED);
 
             return false;
+
         }
 
         return true;

@@ -1,4 +1,4 @@
-package miner82.bananosuite.tabcompleters;
+package miner82.bananosuite.commands.tabcompleters;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;

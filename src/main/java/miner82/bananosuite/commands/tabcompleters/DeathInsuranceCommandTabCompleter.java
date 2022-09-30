@@ -1,4 +1,4 @@
-package miner82.bananosuite.tabcompleters;
+package miner82.bananosuite.commands.tabcompleters;
 
 import miner82.bananosuite.classes.DeathInsuranceOption;
 import org.bukkit.command.Command;

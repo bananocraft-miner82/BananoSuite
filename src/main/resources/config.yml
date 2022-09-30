@@ -1,4 +1,10 @@
-mongoURI: "INSERT MONGOURI HERE"
+#mongoURI: "INSERT MONGOURI HERE"
+
+#mysqlServerName: dbservername
+#mysqlPort: dbport 3306
+#mysqlDatabaseName: dbname
+#mysqlUsername: dbusername
+#mysqlPassword: dbpassword
 
 EnableBananoSuite: true
 

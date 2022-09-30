@@ -61,6 +61,7 @@ public class PaymentProcessor extends BukkitRunnable {
                 } else {
 
                     callback.accept(new PaymentCallbackParameters(sender, recipient, amount, new EconomyResponse(amount, 0, EconomyResponse.ResponseType.FAILURE, "Insufficient balance!"), parameters));
+                    return;
 
                 }
 

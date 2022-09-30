@@ -1,8 +1,8 @@
 package miner82.bananosuite.renderers;
 
-import miner82.bananosuite.DB;
 import miner82.bananosuite.configuration.ConfigEngine;
 import miner82.bananosuite.classes.MonkeyMap;
+import miner82.bananosuite.interfaces.IDBConnection;
 import org.bukkit.entity.Player;
 import org.bukkit.map.MapCanvas;
 import org.bukkit.map.MapRenderer;
@@ -15,28 +15,30 @@ import java.io.IOException;
 
 public class monKeyRenderer extends MapRenderer {
 
-    private ConfigEngine configEngine;
+    private final IDBConnection db;
+    private final ConfigEngine configEngine;
 
     private final String missingFileImage = "missing.png";
 
-    public monKeyRenderer(ConfigEngine configEngine) {
+    public monKeyRenderer(IDBConnection db, ConfigEngine configEngine) {
+        this.db = db;
         this.configEngine = configEngine;
     }
 
     @Override
     public void render(MapView mapView, MapCanvas mapCanvas, Player player) {
 
-        MonkeyMap map = DB.getMapRecord(this.configEngine, mapView);
+        MonkeyMap map = db.getMapRecord(this.configEngine, mapView);
 
         if(map != null) {
 
             try {
 
-                File imageFile = new File(map.getImageFullFilePath());
+                File imageFile = new File(map.getFullFilePath());
 
                 if (!imageFile.exists()) {
 
-                    imageFile = new File(map.getImageFullFilePath());
+                    imageFile = new File(map.getFullFilePath());
 
                 }
 

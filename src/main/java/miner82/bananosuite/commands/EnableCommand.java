@@ -9,7 +9,7 @@ import org.bukkit.entity.Player;
 
 public class EnableCommand extends BaseCommand implements CommandExecutor {
 
-    private ConfigEngine configEngine;
+    private final ConfigEngine configEngine;
 
     public EnableCommand(ConfigEngine configEngine) {
         this.configEngine = configEngine;
@@ -32,16 +32,18 @@ public class EnableCommand extends BaseCommand implements CommandExecutor {
 
         }
 
-        if(args.length != 2) {
+        if(args.length != 2
+             && !(args.length == 1 && args[0].equalsIgnoreCase("reloadconfig"))) {
 
             SendMessage(player, "Incorrect arguments. Expected 2, received " + args.length, ChatColor.RED);
 
             return false;
 
         }
-        else if(!args[1].equalsIgnoreCase("enable")
-                && !args[1].equalsIgnoreCase("disable")
-                && !args[1].equalsIgnoreCase("status")) {
+        else if(!args[0].equalsIgnoreCase("reloadconfig")
+                 && !args[1].equalsIgnoreCase("enable")
+                 && !args[1].equalsIgnoreCase("disable")
+                 && !args[1].equalsIgnoreCase("status")) {
 
             SendMessage(player, "Invalid argument. Valid values are 'enable' and 'disable'.", ChatColor.RED);
 
@@ -52,7 +54,13 @@ public class EnableCommand extends BaseCommand implements CommandExecutor {
         // Apply the setting
         try {
 
-            if(args[1].equalsIgnoreCase("status")) {
+            if(args[0].equalsIgnoreCase("reloadconfig")) {
+
+                SendMessage(player, "Configuration reload command acknowledged.", ChatColor.GREEN);
+                this.configEngine.reload();
+
+            }
+            else if(args[1].equalsIgnoreCase("status")) {
 
                 if (args[0].equalsIgnoreCase("deathinsurance")) {
 

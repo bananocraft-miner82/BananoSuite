@@ -1,9 +1,10 @@
 package miner82.bananosuite.commands;
 
-import miner82.bananosuite.DB;
 import miner82.bananosuite.classes.DeathInsuranceOption;
-import miner82.bananosuite.classes.DeathInsurancePremiumCalculator;
+import miner82.bananosuite.classes.DeathInsuranceManager;
+import miner82.bananosuite.classes.PlayerRecord;
 import miner82.bananosuite.configuration.ConfigEngine;
+import miner82.bananosuite.interfaces.IDBConnection;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -15,10 +16,12 @@ import java.util.Arrays;
 
 public class DeathInsuranceCommand extends BaseCommand implements CommandExecutor {
 
-    private ConfigEngine configEngine;
-    private Economy econ;
+    private final IDBConnection db;
+    private final ConfigEngine configEngine;
+    private final Economy econ;
 
-    public DeathInsuranceCommand(ConfigEngine configEngine, Economy econ) {
+    public DeathInsuranceCommand(ConfigEngine configEngine, Economy econ, IDBConnection db) {
+        this.db  = db;
         this.configEngine = configEngine;
         this.econ = econ;
     }
@@ -43,6 +46,16 @@ public class DeathInsuranceCommand extends BaseCommand implements CommandExecuto
 
         }
 
+        PlayerRecord playerRecord = db.getPlayerRecord(player);
+
+        if(playerRecord == null) {
+
+            SendMessage(player, "Your BananoSuite profile could not be loaded! Please contact an admin.", ChatColor.RED);
+
+            return false;
+
+        }
+
         if(args.length == 0) {
 
             SendMessage(player, "Incorrect argument(s). Between 1 and 2, received " + args.length, ChatColor.RED);
@@ -51,12 +64,14 @@ public class DeathInsuranceCommand extends BaseCommand implements CommandExecuto
 
         }
 
+        DeathInsuranceOption current = playerRecord.getDeathInsuranceOption();
+
         // START A NEW DEATH INSURANCE POLICY
         if(args[0].equalsIgnoreCase("start")) {
 
             if(args.length < 2
                 || args[1].equalsIgnoreCase(DeathInsuranceOption.None.toString())
-                || !Arrays.stream(DeathInsuranceOption.values()).anyMatch(v -> v.toString().equalsIgnoreCase(args[1]))) {
+                || Arrays.stream(DeathInsuranceOption.values()).noneMatch(v -> v.toString().equalsIgnoreCase(args[1]))) {
 
                 SendMessage(player, "A policy level is required in the second argument. Valid values include '"
                         + DeathInsuranceOption.Inventory + "' and '" + DeathInsuranceOption.Full + "'.", ChatColor.RED);
@@ -66,24 +81,30 @@ public class DeathInsuranceCommand extends BaseCommand implements CommandExecuto
             }
 
             // Get the provided option
-            DeathInsuranceOption current = DB.getPlayerDeathInsurance(player);
             DeathInsuranceOption option = DeathInsuranceOption.valueOf(args[1]);
 
             // Record the provided option
             if(current != option) {
 
-                DB.setPlayerDeathInsuranceOption(player, option);
+                playerRecord.setDeathInsuranceOption(option);
+                if(db.save(playerRecord)) {
 
-                if(current == DeathInsuranceOption.None) {
+                    if (current == DeathInsuranceOption.None) {
 
-                    SendMessage(player, "Congratulations on your new Death Insurance policy! You are now covered for [" + option.toString() + "].", ChatColor.GREEN);
-                    SendMessage(player, "Your first premium will cost " + econ.format(DeathInsurancePremiumCalculator.CalculateNextPremium(this.configEngine, player, option)) + " and the cost will increase based on the number of deaths in a 24 hour period.", ChatColor.GREEN);
+                        SendMessage(player, "Congratulations on your new Death Insurance policy! You are now covered for [" + option.toString() + "].", ChatColor.GREEN);
+                        SendMessage(player, "Your first premium will cost " + econ.format(DeathInsuranceManager.CalculateNextPremium(this.db, this.configEngine, playerRecord, option)) + " and the cost will increase based on the number of deaths in a 24 hour period.", ChatColor.GREEN);
+
+                    } else {
+
+                        SendMessage(player, "Your Death Insurance policy has been changed from [" + current.toString() + "] to [" + option.toString() + "].", ChatColor.GREEN);
+                        SendMessage(player, "Your first premium will cost " + econ.format(DeathInsuranceManager.CalculateNextPremium(this.db, this.configEngine, playerRecord, option)) + " and the cost will increase based on the number of deaths in a 24 hour period..", ChatColor.GREEN);
+
+                    }
 
                 }
                 else {
 
-                    SendMessage(player, "Your Death Insurance policy has been changed from [" + current.toString() + "] to [" + option.toString() + "].", ChatColor.GREEN);
-                    SendMessage(player, "Your first premium will cost " + econ.format(DeathInsurancePremiumCalculator.CalculateNextPremium(this.configEngine, player, option)) + " and the cost will increase based on the number of deaths in a 24 hour period..", ChatColor.GREEN);
+                    SendMessage(player, "An error occurred while saving your policy details. Please check with an admin!", ChatColor.RED);
 
                 }
 
@@ -99,9 +120,11 @@ public class DeathInsuranceCommand extends BaseCommand implements CommandExecuto
         }
         else if(args[0].equalsIgnoreCase("stop")) {
 
-            if(DB.getPlayerDeathInsurance(player) != DeathInsuranceOption.None) {
+            //if(db.getPlayerDeathInsurance(player) != DeathInsuranceOption.None) {
+            if(current != DeathInsuranceOption.None) {
 
-                DB.setPlayerDeathInsuranceOption(player, DeathInsuranceOption.None);
+                playerRecord.setDeathInsuranceOption(DeathInsuranceOption.None);
+                db.save(playerRecord);
 
                 SendMessage(player, "Your Death Insurance policy has been terminated.", ChatColor.GREEN);
 
@@ -115,7 +138,7 @@ public class DeathInsuranceCommand extends BaseCommand implements CommandExecuto
         }
         else if(args[0].equalsIgnoreCase("quote")) {
 
-            DeathInsuranceOption option = DB.getPlayerDeathInsurance(player);
+            DeathInsuranceOption option = current; // db.getPlayerDeathInsurance(player);
 
             if(args.length == 2) {
 
@@ -123,18 +146,18 @@ public class DeathInsuranceCommand extends BaseCommand implements CommandExecuto
                     option = DeathInsuranceOption.valueOf(args[1]);
                 }
                 catch (IllegalArgumentException ex) {
-                    option = DB.getPlayerDeathInsurance(player);
+                    option = current; //db.getPlayerDeathInsurance(player);
                 }
             }
 
-            SendMessage(player, "Your next premium for " + option.toString() + " death insurance will cost " + econ.format(DeathInsurancePremiumCalculator.CalculateNextPremium(this.configEngine, player, option)) + " and the cost will increase based on the number of deaths in a 24 hour period.", ChatColor.GREEN);
+            SendMessage(player, "Your next premium for " + option.toString() + " death insurance will cost " + econ.format(DeathInsuranceManager.CalculateNextPremium(this.db, this.configEngine, playerRecord, option)) + " and the cost will increase based on the number of deaths in a 24 hour period.", ChatColor.GREEN);
 
             return true;
 
         }
         else if(args[0].equalsIgnoreCase("query")) {
 
-            DeathInsuranceOption current = DB.getPlayerDeathInsurance(player);
+            //DeathInsuranceOption current = db.getPlayerDeathInsurance(player);
 
             SendMessage(player, "Your current Death Insurance policy is: " + current.toString(), ChatColor.GOLD);
 

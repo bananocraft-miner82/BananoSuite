@@ -1,4 +1,4 @@
-package miner82.bananosuite.tabcompleters;
+package miner82.bananosuite.commands.tabcompleters;
 
 import miner82.bananosuite.configuration.ConfigEngine;
 import org.bukkit.command.Command;
@@ -29,9 +29,11 @@ public class EnableCommandTabCompleter implements TabCompleter{
             results.add("pvptoggle");
             results.add("rain");
             results.add("teleport");
+            results.add("reloadconfig");
 
         }
-        else if(args.length == 2) {
+        else if(args.length == 2
+                 && !args[0].equalsIgnoreCase("reloadconfig")) {
 
             results.add("enable");
             results.add("disable");

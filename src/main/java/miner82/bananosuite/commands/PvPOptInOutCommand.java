@@ -1,7 +1,8 @@
 package miner82.bananosuite.commands;
 
-import miner82.bananosuite.DB;
+import miner82.bananosuite.classes.PlayerRecord;
 import miner82.bananosuite.configuration.ConfigEngine;
+import miner82.bananosuite.interfaces.IDBConnection;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -10,9 +11,11 @@ import org.bukkit.entity.Player;
 
 public class PvPOptInOutCommand extends BaseCommand implements CommandExecutor {
 
-    private ConfigEngine configEngine;
+    private final IDBConnection db;
+    private final ConfigEngine configEngine;
 
-    public PvPOptInOutCommand(ConfigEngine configEngine) {
+    public PvPOptInOutCommand(IDBConnection db, ConfigEngine configEngine) {
+        this.db = db;
         this.configEngine = configEngine;
     }
 
@@ -58,9 +61,11 @@ public class PvPOptInOutCommand extends BaseCommand implements CommandExecutor {
 
         }
 
+        PlayerRecord playerRecord = db.getPlayerRecord(player);
+
         if(args[0].equalsIgnoreCase("QUERY")) {
 
-            if(DB.getPlayerPvPOptIn(player)) {
+            if(playerRecord.isPvpOptedIn()) {
 
                 SendMessage(player, "You are currently OPTED IN for PvP.", ChatColor.RED);
 
@@ -74,9 +79,10 @@ public class PvPOptInOutCommand extends BaseCommand implements CommandExecutor {
         }
         else {
 
-            DB.setPlayerPvPOptIn(player, args[0].equalsIgnoreCase("PVPON"));
+            playerRecord.setPvpOptedIn(args[0].equalsIgnoreCase("PVPON"));
+            db.save(playerRecord);
 
-            if(DB.getPlayerPvPOptIn(player)) {
+            if(playerRecord.isPvpOptedIn()) {
 
                 SendMessage(player, "You are now OPTED IN for PvP.", ChatColor.RED);
 

@@ -1,16 +1,19 @@
 package miner82.bananosuite.classes;
 
-import miner82.bananosuite.DB;
 import miner82.bananosuite.configuration.ConfigEngine;
-import org.bukkit.entity.Player;
+import miner82.bananosuite.interfaces.IDBConnection;
 
-import java.time.DayOfWeek;
+import java.time.*;
 
-public class DeathInsurancePremiumCalculator {
+public class DeathInsuranceManager {
 
-    public static double CalculateNextPremium(ConfigEngine configEngine, Player player, DeathInsuranceOption insuranceOption) {
+    public static double CalculateNextPremium(IDBConnection db, ConfigEngine configEngine, PlayerRecord playerRecord, DeathInsuranceOption insuranceOption) {
 
-        double last24HrUses = DB.getPlayerPremiumUseCountInLast24Hours(player);
+        if(insuranceOption == DeathInsuranceOption.None) {
+            return 0;
+        }
+
+        double last24HrUses = db.getPlayerDIUseCountInLast24Hours(playerRecord.getUUID());
 
         if(insuranceOption == DeathInsuranceOption.None) {
             return 0;
@@ -28,8 +31,8 @@ public class DeathInsurancePremiumCalculator {
                 premium = baseCost * (java.lang.Math.pow(1 + growthRate, last24HrUses));
 
             }
-            else if(DB.getPlayerPremiumUseCountSinceDate(player, DateCalculator.GetDateOfLastDayOfWeek(DayOfWeek.SUNDAY)) == 0
-                  && DB.getPlayerIsCitizen(player)) {
+            else if(db.getPlayerDIUseCountSinceDate(playerRecord.getUUID(), DateCalculator.GetDateOfLastDayOfWeek(DayOfWeek.SUNDAY)) == 0
+                    && playerRecord.getPlayerRank().getPerks()) {
 
                 // The first death per week is free if the player is a citizen.
                 return 0;
@@ -54,4 +57,5 @@ public class DeathInsurancePremiumCalculator {
         return Math.Round(premium, 2);
 
     }
+
 }

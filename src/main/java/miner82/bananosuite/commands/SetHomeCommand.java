@@ -1,7 +1,8 @@
 package miner82.bananosuite.commands;
 
-import miner82.bananosuite.DB;
+import miner82.bananosuite.classes.PlayerRecord;
 import miner82.bananosuite.configuration.ConfigEngine;
+import miner82.bananosuite.interfaces.IDBConnection;
 import org.bukkit.*;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -10,9 +11,11 @@ import org.bukkit.entity.Player;
 
 public class SetHomeCommand extends BaseCommand implements CommandExecutor {
 
-    private ConfigEngine configEngine;
+    private final IDBConnection db;
+    private final ConfigEngine configEngine;
 
-    public SetHomeCommand(ConfigEngine configEngine) {
+    public SetHomeCommand(IDBConnection db, ConfigEngine configEngine) {
+        this.db = db;
         this.configEngine = configEngine;
     }
 
@@ -46,7 +49,19 @@ public class SetHomeCommand extends BaseCommand implements CommandExecutor {
 
         Location newHomeLocation = player.getLocation();
 
-        if(DB.setPlayerHomeLocation(player, player.getLocation())) {
+        PlayerRecord playerRecord = db.getPlayerRecord(player);
+
+        if(playerRecord == null) {
+
+            SendMessage(player, "Your BananoSuite profile could not be loaded! Please contact an admin.", ChatColor.RED);
+
+            return false;
+
+        }
+
+        playerRecord.setHomeLocation(newHomeLocation);
+
+        if(db.save(playerRecord)) {
 
             SendMessage(player, "Your home location has been set to " + newHomeLocation.getBlockX() + " / " + newHomeLocation.getBlockY() + " / " + newHomeLocation.getBlockZ() + ".", ChatColor.GREEN);
 
