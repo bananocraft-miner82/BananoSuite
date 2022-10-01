@@ -615,7 +615,17 @@ public class ConfigEngine {
                     && configuration.getString("mysqlServerName").length() > 0) {
 
                 this.mysqlServerName = configuration.getString("mysqlServerName");
-                this.mysqlPort = configuration.getInt("mysqlPort");
+
+                if(configuration.isInt("mysqlPort")) {
+
+                    this.mysqlPort = configuration.getInt("mysqlPort");
+
+                } else {
+
+                    this.mysqlPort = Integer.parseInt(configuration.getString("mysqlPort"));
+
+                }
+
                 this.mysqlDatabaseName = configuration.getString("mysqlDatabaseName");
                 this.mysqlUsername = configuration.getString("mysqlUsername");
                 this.mysqlPassword = configuration.getString("mysqlPassword");
