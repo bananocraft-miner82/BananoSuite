@@ -38,6 +38,16 @@ public class MySQLDBConnector extends BaseDBConnector {
         this.dataSource.setMaxLifetime(60000);
         this.dataSource.setMinimumIdle(5);
 
+        if(Bukkit.getMaxPlayers() > 50) {
+            this.dataSource.setMaximumPoolSize(50);
+        }
+        else if(Bukkit.getMaxPlayers() < 5) {
+            this.dataSource.setMaximumPoolSize(5);
+        }
+        else {
+            this.dataSource.setMaximumPoolSize(Bukkit.getMaxPlayers());
+        }
+
         setupDatabase();
 
         loadMaps();
@@ -91,6 +101,7 @@ public class MySQLDBConnector extends BaseDBConnector {
             PreparedStatement userTableCreator = connection.prepareStatement(usersTable);
 
             userTableCreator.execute();
+            userTableCreator.close();
 
         }
         catch (Exception ex) {
@@ -116,6 +127,7 @@ public class MySQLDBConnector extends BaseDBConnector {
             PreparedStatement mapsTableCreator = connection.prepareStatement(mapsTable);
 
             mapsTableCreator.execute();
+            mapsTableCreator.close();
 
         }
         catch (Exception ex) {
@@ -137,6 +149,7 @@ public class MySQLDBConnector extends BaseDBConnector {
             PreparedStatement insuredDeathsTableCreator = connection.prepareStatement(insuredDeathsTable);
 
             insuredDeathsTableCreator.execute();
+            insuredDeathsTableCreator.close();
 
         }
         catch (Exception ex) {
@@ -221,7 +234,6 @@ public class MySQLDBConnector extends BaseDBConnector {
                                                               results.getInt("homey"),
                                                               results.getInt("homez")));
 
-                results.close();
 
             }
             else {
@@ -231,6 +243,20 @@ public class MySQLDBConnector extends BaseDBConnector {
             }
 
             playerRecords.put(key, playerRecord);
+
+            try {
+                results.close();
+            }
+            catch (Exception ex) {
+                ex.printStackTrace();
+            }
+
+            try {
+                query.close();
+            }
+            catch (Exception ex) {
+                ex.printStackTrace();
+            }
 
         }
         catch (Exception ex) {
@@ -291,6 +317,7 @@ public class MySQLDBConnector extends BaseDBConnector {
 
 
             insert.executeUpdate();
+            insert.close();
 
             playerRecord = new PlayerRecord(playerUUID, player.getName(), LocalDateTime.now(),
                                                 DeathInsuranceOption.None, LocalDateTime.now(), false, PlayerRank.None,
@@ -384,6 +411,8 @@ public class MySQLDBConnector extends BaseDBConnector {
 
             result = insert.executeUpdate() > 0;
 
+            insert.close();
+
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -436,6 +465,8 @@ public class MySQLDBConnector extends BaseDBConnector {
 
 
                     insert.executeUpdate();
+
+                    insert.close();
 
                 }
                 catch (Exception e) {
@@ -490,8 +521,20 @@ public class MySQLDBConnector extends BaseDBConnector {
 
                 uses = results.getInt("uses");
 
-                results.close();
+            }
 
+            try {
+                results.close();
+            }
+            catch (Exception ex) {
+                ex.printStackTrace();
+            }
+
+            try {
+                query.close();
+            }
+            catch (Exception ex) {
+                ex.printStackTrace();
             }
 
         }
@@ -547,7 +590,19 @@ public class MySQLDBConnector extends BaseDBConnector {
 
             }
 
-            results.close();
+            try {
+                results.close();
+            }
+            catch (Exception ex) {
+                ex.printStackTrace();
+            }
+
+            try {
+                query.close();
+            }
+            catch (Exception ex) {
+                ex.printStackTrace();
+            }
 
         }
         catch (Exception ex) {
@@ -598,6 +653,8 @@ public class MySQLDBConnector extends BaseDBConnector {
                 insert.setString(11, map.getStatus().name());
 
                 result = insert.executeUpdate() > 0;
+
+                insert.close();
 
             }
             catch (Exception ex) {

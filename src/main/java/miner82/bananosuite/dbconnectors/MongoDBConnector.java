@@ -10,7 +10,6 @@ import miner82.bananosuite.BananoSuitePlugin;
 import miner82.bananosuite.classes.*;
 import miner82.bananosuite.configuration.ConfigEngine;
 import org.bson.Document;
-import org.bson.types.ObjectId;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -85,11 +84,37 @@ public class MongoDBConnector extends BaseDBConnector {
                 boolean pvpOptedIn = user.getBoolean("pvpoptedin");
                 Location homeLocation = player.getBedSpawnLocation();
                 boolean shieldsUp = user.getBoolean("shieldsup");
-                PlayerRank playerRank = PlayerRank.valueOf(user.getString("playerrank"));
+                PlayerRank playerRank = PlayerRank.None;
                 LocalDateTime joined = LocalDateTime.ofInstant(Instant.ofEpochMilli(user.getLong("joined")), ZoneOffset.UTC);
-                LocalDateTime lastDIUsage = LocalDateTime.ofInstant(Instant.ofEpochMilli(user.getLong("lastdiuse")), ZoneOffset.UTC);
 
-                World world = Bukkit.getWorld(UUID.fromString(user.getString("homeWorldId")));
+                LocalDateTime lastDIUsage = LocalDateTime.now();
+
+                if(user.containsKey("playerrank")) {
+
+                    playerRank = PlayerRank.valueOf(user.get("playerrank", "None"));
+
+                }
+
+                if(user.containsKey("lastdiuse")) {
+
+                    lastDIUsage = LocalDateTime.ofInstant(Instant.ofEpochMilli(user.getLong("lastdiuse")), ZoneOffset.UTC);
+
+                }
+
+                World world = player.getWorld();
+
+                if(user.containsKey("homeWorldId")) {
+
+                    world = Bukkit.getWorld(UUID.fromString(user.getString("homeWorldId")));
+
+                }
+                else if(user.containsKey("homeWorld")
+                         && Bukkit.getWorld(user.getString("homeWorld")) != null) {
+
+                    // backwards compatibility
+                    world = Bukkit.getWorld(user.getString("homeWorld"));
+
+                }
 
                 if (world != null) {
 
