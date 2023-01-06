@@ -8,6 +8,8 @@ softdepend: [Essentials]
 commands:
   bananosuite:
     description: OP commands to manage the plugin configuration.
+    permission: bsadmin
+    permission-message: You do not have permission to use this command.
   shields:
     description: OP-only command to prevent damage.
   donate:

@@ -26,7 +26,8 @@ public class AdminCommandTabCompleter implements TabCompleter{
 
             Player player = (Player) sender;
 
-            if(!player.hasPermission(command.getPermission())) {
+            if(!player.isOp()
+                && !player.hasPermission(command.getPermission())) {
 
                 return results;
 
