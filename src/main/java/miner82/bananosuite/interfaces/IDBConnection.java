@@ -35,5 +35,7 @@ public interface IDBConnection {
     int getReadyForCollectionMapCount(Player forPlayer);
     boolean save(MonkeyMap map);
 
+    boolean reloadMaps();
+
 
 }

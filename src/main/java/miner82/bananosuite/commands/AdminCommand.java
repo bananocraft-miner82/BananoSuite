@@ -1,18 +1,21 @@
 package miner82.bananosuite.commands;
 
 import miner82.bananosuite.configuration.ConfigEngine;
+import miner82.bananosuite.interfaces.IDBConnection;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-public class EnableCommand extends BaseCommand implements CommandExecutor {
+public class AdminCommand extends BaseCommand implements CommandExecutor {
 
     private final ConfigEngine configEngine;
+    private final IDBConnection db;
 
-    public EnableCommand(ConfigEngine configEngine) {
+    public AdminCommand(ConfigEngine configEngine, IDBConnection db) {
         this.configEngine = configEngine;
+        this.db = db;
     }
 
     @Override
@@ -33,7 +36,14 @@ public class EnableCommand extends BaseCommand implements CommandExecutor {
         }
 
         if(args.length != 2
-             && !(args.length == 1 && args[0].equalsIgnoreCase("reloadconfig"))) {
+             && !(args.length == 1 && args[0].equalsIgnoreCase("reloadconfig"))
+             && !(args.length == 3
+                      && args[0].equalsIgnoreCase("monkeymaps")
+                      && args[1].equalsIgnoreCase("setbaserate"))
+             && !(args.length == 3
+                      && args[0].equalsIgnoreCase("deathinsurance")
+                      && (args[1].equalsIgnoreCase("setmmprice")
+                          || args[1].equalsIgnoreCase("setqrprice")))) {
 
             SendMessage(player, "Incorrect arguments. Expected 2, received " + args.length, ChatColor.RED);
 
@@ -43,7 +53,10 @@ public class EnableCommand extends BaseCommand implements CommandExecutor {
         else if(!args[0].equalsIgnoreCase("reloadconfig")
                  && !args[1].equalsIgnoreCase("enable")
                  && !args[1].equalsIgnoreCase("disable")
-                 && !args[1].equalsIgnoreCase("status")) {
+                 && !args[1].equalsIgnoreCase("status")
+                 && !args[1].equalsIgnoreCase("setbaserate")
+                 && !args[1].equalsIgnoreCase("setmmprice")
+                 && !args[1].equalsIgnoreCase("setqrprice")) {
 
             SendMessage(player, "Invalid argument. Valid values are 'enable' and 'disable'.", ChatColor.RED);
 
@@ -89,6 +102,106 @@ public class EnableCommand extends BaseCommand implements CommandExecutor {
                 } else {
 
                     SendMessage(player, "The command '" + args[0] + "' could not be identified.", ChatColor.RED);
+
+                }
+
+            }
+            else if(args[0].equalsIgnoreCase("deathinsurance")
+                     && args[1].equalsIgnoreCase("setbaserate")) {
+
+                String value = args[2];
+
+                try {
+
+                    double baseRate = Double.parseDouble(value);
+
+                    if(baseRate < 0) {
+
+                        SendMessage(player, "The base rate could not be set. Please ensure it is a valid, positive number", ChatColor.RED);
+                        return false;
+
+                    }
+                    else {
+
+                        this.configEngine.setBaseDeathInsurancePremium(baseRate);
+                        this.configEngine.save();
+
+                    }
+
+                }
+                catch (Exception e) {
+
+                    SendMessage(player, "The base rate could not be set. Please ensure it is a valid, positive number", ChatColor.RED);
+                    return false;
+
+                }
+
+
+            }
+            else if(args[0].equalsIgnoreCase("monkeymaps")
+                    && (args[1].equalsIgnoreCase("setmmprice")
+                         || args[1].equalsIgnoreCase("setqrprice"))) {
+
+                String value = args[2];
+
+                try {
+
+                    double price = Double.parseDouble(value);
+
+                    if(price < 0) {
+
+                        SendMessage(player, "The map price could not be set. Please ensure it is a valid, positive number", ChatColor.RED);
+                        return false;
+
+                    }
+                    else {
+
+                        if(args[1].equalsIgnoreCase("setmmprice")) {
+
+                            this.configEngine.setMonKeyPrice(price);
+
+                        }
+                        else {
+
+                            this.configEngine.setQrPrice(price);
+
+                        }
+
+                        this.configEngine.save();
+
+                    }
+
+                }
+                catch (Exception e) {
+
+                    SendMessage(player, "The base rate could not be set. Please ensure it is a valid, positive number", ChatColor.RED);
+                    return false;
+
+                }
+
+
+            }
+            else if(args[0].equalsIgnoreCase("monkeymaps")
+                     && args[1].equalsIgnoreCase("reload")) {
+
+                try {
+
+                    if(this.db.reloadMaps()) {
+
+                        SendMessage(player, "MonKeyMaps reloaded successfully!", ChatColor.GREEN);
+
+                    }
+                    else {
+
+                        SendMessage(player, "MonKeyMaps could not be reloaded!", ChatColor.RED);
+
+                    }
+
+                }
+                catch (Exception ex) {
+
+                    SendMessage(player, "MonKeyMaps could not be reloaded! An exception occurred. Please check the server logs.", ChatColor.RED);
+                    ex.printStackTrace();
 
                 }
 

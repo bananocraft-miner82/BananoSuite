@@ -4,15 +4,16 @@ import miner82.bananosuite.configuration.ConfigEngine;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
+import org.bukkit.entity.Player;
 import org.bukkit.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class EnableCommandTabCompleter implements TabCompleter{
+public class AdminCommandTabCompleter implements TabCompleter{
     private ConfigEngine configEngine;
 
-    public EnableCommandTabCompleter(ConfigEngine configEngine) {
+    public AdminCommandTabCompleter(ConfigEngine configEngine) {
         this.configEngine = configEngine;
     }
 
@@ -20,6 +21,18 @@ public class EnableCommandTabCompleter implements TabCompleter{
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
 
         List<String> results = new ArrayList<>();
+
+        if(sender instanceof Player) {
+
+            Player player = (Player) sender;
+
+            if(!player.hasPermission(command.getPermission())) {
+
+                return results;
+
+            }
+
+        }
 
         if(args.length == 1) {
 
@@ -38,6 +51,19 @@ public class EnableCommandTabCompleter implements TabCompleter{
             results.add("enable");
             results.add("disable");
             results.add("status");
+
+            if(args[0].equalsIgnoreCase("deathinsurance")) {
+
+                results.add("setbaserate");
+
+            }
+            else if(args[0].equalsIgnoreCase("monkeymaps")) {
+
+                results.add("setmmprice");
+                results.add("setqrprice");
+                results.add("reload");
+
+            }
 
         }
 

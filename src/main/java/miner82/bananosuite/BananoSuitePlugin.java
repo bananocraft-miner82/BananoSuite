@@ -62,12 +62,12 @@ public final class BananoSuitePlugin extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new MonkeyMapInitialiseEvent(this.db, this.configEngine), this);
 
         getCommand("shields").setExecutor(new ShieldsCommand(this.db, this.configEngine));
-        getCommand("bananosuite").setExecutor(new EnableCommand(this.configEngine));
+        getCommand("bananosuite").setExecutor(new AdminCommand(this.configEngine, this.db));
         getCommand("sethome").setExecutor(new SetHomeCommand(this.db, this.configEngine));
         //////getCommand("pvptoggle").setExecutor(new PvPOptInOutCommand(this.db, this.configEngine));
 
 
-        getCommand("bananosuite").setTabCompleter(new EnableCommandTabCompleter(this.configEngine));
+        getCommand("bananosuite").setTabCompleter(new AdminCommandTabCompleter(this.configEngine));
         getCommand("shields").setTabCompleter(new ShieldsCommandTabCompleter());
         //////getCommand("pvptoggle").setTabCompleter(new PvPOptInOutTabCompleter(this.configEngine));
 

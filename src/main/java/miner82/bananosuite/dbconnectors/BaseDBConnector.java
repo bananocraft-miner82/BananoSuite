@@ -255,4 +255,15 @@ public class BaseDBConnector implements IDBConnection {
 
     }
 
+    @Override
+    public boolean reloadMaps() {
+
+        this.maps.clear();
+
+        loadMaps();
+
+        return false;
+
+    }
+
 }
