@@ -26,7 +26,7 @@ public class OnPlayerLeaveEvent implements Listener {
         }
         else {
 
-            System.out.println("BananoSuite Player Profile for " + player.getName() + " [" + player.getUniqueId() + "] encountered issues while unloading!");
+            System.out.println("BananoSuite Player Profile for " + player.getName() + " [" + player.getUniqueId() + "]  had no changes to save, or encountered issues while unloading!");
 
         }
 
