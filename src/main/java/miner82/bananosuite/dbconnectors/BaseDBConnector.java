@@ -262,7 +262,7 @@ public class BaseDBConnector implements IDBConnection {
 
         loadMaps();
 
-        return false;
+        return true;
 
     }
 

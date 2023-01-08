@@ -35,35 +35,6 @@ public class AdminCommand extends BaseCommand implements CommandExecutor {
 
         }
 
-        if(args.length != 2
-             && !(args.length == 1 && args[0].equalsIgnoreCase("reloadconfig"))
-             && !(args.length == 3
-                      && args[0].equalsIgnoreCase("monkeymaps")
-                      && args[1].equalsIgnoreCase("setbaserate"))
-             && !(args.length == 3
-                      && args[0].equalsIgnoreCase("deathinsurance")
-                      && (args[1].equalsIgnoreCase("setmmprice")
-                          || args[1].equalsIgnoreCase("setqrprice")))) {
-
-            SendMessage(player, "Incorrect arguments. Expected 2, received " + args.length, ChatColor.RED);
-
-            return false;
-
-        }
-        else if(!args[0].equalsIgnoreCase("reloadconfig")
-                 && !args[1].equalsIgnoreCase("enable")
-                 && !args[1].equalsIgnoreCase("disable")
-                 && !args[1].equalsIgnoreCase("status")
-                 && !args[1].equalsIgnoreCase("setbaserate")
-                 && !args[1].equalsIgnoreCase("setmmprice")
-                 && !args[1].equalsIgnoreCase("setqrprice")) {
-
-            SendMessage(player, "Invalid argument. Valid values are 'enable' and 'disable'.", ChatColor.RED);
-
-            return false;
-
-        }
-
         // Apply the setting
         try {
 
@@ -206,7 +177,8 @@ public class AdminCommand extends BaseCommand implements CommandExecutor {
                 }
 
             }
-            else {
+            else if (args[1].equalsIgnoreCase("enable")
+                      || !args[1].equalsIgnoreCase("disable")){
 
                 boolean enabled = args[1].equalsIgnoreCase("enable");
 
@@ -258,6 +230,11 @@ public class AdminCommand extends BaseCommand implements CommandExecutor {
                     return false;
 
                 }
+
+            }
+            else {
+
+                SendMessage(player, "Invalid arguments!", ChatColor.RED);
 
             }
 
