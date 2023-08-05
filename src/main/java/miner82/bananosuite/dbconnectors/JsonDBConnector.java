@@ -201,7 +201,7 @@ public class JsonDBConnector extends BaseDBConnector {
 
             PlayerRecord playerRecord = new PlayerRecord(playerUUID, player.getName(), LocalDateTime.now(),
                                                             DeathInsuranceOption.None, LocalDateTime.now(), false, PlayerRank.None,
-                                                            false, player.getBedSpawnLocation());
+                                                            false, player.getBedSpawnLocation(), 0);
 
             if(save(playerRecord)) {
 

@@ -19,9 +19,9 @@ commands:
     aliases: [makeitrain]
   sethome:
     description: Sets the home co-ordinates for use with the /home command.
-  teleport:
-    description: Teleports the player to the specified location, for a fee. Additional QUOTE parameter to query the cost.
-    aliases: [tp]
+#  teleport:
+#    description: Teleports the player to the specified location, for a fee. Additional QUOTE parameter to query the cost.
+#    aliases: [tp]
   spawn:
     description: Teleports the player to the world spawn coordinates, for a fee.
     aliases: [tps]
@@ -37,3 +37,5 @@ commands:
     description: Provides the ability to buy a map displaying the monKey or QR code for your Banano address.
   help:
     description: Displays a list of commands and possible parameters.
+  wild:
+    description: Teleport to a random location to get started. Maximum 3 attempts, with the last two having a potential cost.

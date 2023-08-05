@@ -86,6 +86,16 @@ public class MongoDBConnector extends BaseDBConnector {
                 boolean shieldsUp = user.getBoolean("shieldsup");
                 PlayerRank playerRank = PlayerRank.None;
                 LocalDateTime joined = LocalDateTime.ofInstant(Instant.ofEpochMilli(user.getLong("joined")), ZoneOffset.UTC);
+                int wildTeleportUseCount = 0;
+
+                if(user.containsKey("wildusecount")) {
+
+                    System.out.println("Pre-load wildTeleportUseCount: " + wildTeleportUseCount);
+                    wildTeleportUseCount = user.getInteger("wildusecount");
+
+                    System.out.println(user.getInteger("wildusecount"));
+                    System.out.println("Post-load wildTeleportUseCount" + wildTeleportUseCount);
+                }
 
                 LocalDateTime lastDIUsage = LocalDateTime.now();
 
@@ -139,7 +149,8 @@ public class MongoDBConnector extends BaseDBConnector {
                                                 pvpOptedIn,
                                                 playerRank,
                                                 shieldsUp,
-                                                homeLocation);
+                                                homeLocation,
+                                                wildTeleportUseCount);
 
             }
             catch (Exception e) {
@@ -188,7 +199,8 @@ public class MongoDBConnector extends BaseDBConnector {
                 .append("homeWorldName", spawnLocation.getWorld().getName())
                 .append("homeX", spawnLocation.getBlockX())
                 .append("homeY", spawnLocation.getBlockY())
-                .append("homeZ", spawnLocation.getBlockZ());
+                .append("homeZ", spawnLocation.getBlockZ())
+                .append("wildusecount", 0);
 
         db.getCollection("users").insertOne(document1);
 
@@ -200,7 +212,8 @@ public class MongoDBConnector extends BaseDBConnector {
                                                     player.isOp(),
                                                     PlayerRank.None,
                                                     false,
-                                                    spawnLocation);
+                                                    spawnLocation,
+                                                    0);
 
         if(!this.playerRecords.containsKey(playerUUID)) {
             this.playerRecords.put(playerUUID, playerRecord);
@@ -231,6 +244,7 @@ public class MongoDBConnector extends BaseDBConnector {
             updateFields.append("homeX", playerRecord.getHomeLocation().getBlockX());
             updateFields.append("homeY", playerRecord.getHomeLocation().getBlockY());
             updateFields.append("homeZ", playerRecord.getHomeLocation().getBlockZ());
+            updateFields.append("wildusecount", playerRecord.getWildTeleportUseCount());
 
             BasicDBObject setQuery = new BasicDBObject();
             setQuery.append("$set", updateFields);

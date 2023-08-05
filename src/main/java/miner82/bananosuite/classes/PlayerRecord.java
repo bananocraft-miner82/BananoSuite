@@ -18,10 +18,13 @@ public class PlayerRecord {
     private boolean shieldsUp;
     private Location homeLocation;
 
+    private int wildTeleportUseCount;
+
     public PlayerRecord(UUID playerUUID, String playerName, LocalDateTime joined,
                         DeathInsuranceOption insuranceOption, LocalDateTime lastDIPolicyUsage,
                         boolean pvpOptedIn, PlayerRank playerRank,
-                        boolean shieldsUp, Location homeLocation) {
+                        boolean shieldsUp, Location homeLocation,
+                        int wildTeleportUseCount) {
 
         this.uuid = playerUUID;
         this.playerName = playerName;
@@ -32,6 +35,7 @@ public class PlayerRecord {
         this.playerRank = playerRank;
         this.shieldsUp = shieldsUp;
         this.homeLocation = homeLocation;
+        this.wildTeleportUseCount = wildTeleportUseCount;
 
     }
 
@@ -91,6 +95,14 @@ public class PlayerRecord {
 
     public void setHomeLocation(Location homeLocation) {
         this.homeLocation = homeLocation;
+    }
+
+    public int getWildTeleportUseCount() {
+        return this.wildTeleportUseCount;
+    }
+
+    public void incrementWildTeleportUseCount() {
+        this.wildTeleportUseCount++;
     }
 
 }

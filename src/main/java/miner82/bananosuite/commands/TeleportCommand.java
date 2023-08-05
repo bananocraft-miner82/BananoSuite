@@ -17,8 +17,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.event.player.PlayerTeleportEvent;
-import org.bukkit.util.Vector;
+import org.bukkit.plugin.Plugin;
 
 import java.util.Optional;
 
@@ -30,7 +29,10 @@ public class TeleportCommand extends BaseTeleportCommand implements CommandExecu
     private final Economy econ;
     private final ConfigEngine configEngine;
 
-    public TeleportCommand(IDBConnection db, ConfigEngine configEngine, Economy econ) {
+    public TeleportCommand(Plugin plugin, IDBConnection db, ConfigEngine configEngine, Economy econ) {
+
+        super(plugin);
+
         this.db = db;
         this.configEngine = configEngine;
         this.econ = econ;

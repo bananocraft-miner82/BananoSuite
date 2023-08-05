@@ -3,7 +3,11 @@ package miner82.bananosuite.commands;
 import miner82.bananosuite.classes.DistanceCalculator;
 import miner82.bananosuite.classes.TeleportLocationMaker;
 import miner82.bananosuite.classes.TeleportPremiumCalculator;
+import miner82.bananosuite.classes.TeleportRequest;
 import miner82.bananosuite.configuration.ConfigEngine;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.TextComponent;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.economy.EconomyResponse;
 import org.bukkit.Bukkit;
@@ -14,6 +18,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 
 import java.util.Optional;
 
@@ -24,7 +29,10 @@ public class TeleportSpawnCommand extends BaseTeleportCommand implements Command
     private final Economy econ;
     private final ConfigEngine configEngine;
 
-    public TeleportSpawnCommand(ConfigEngine configEngine, Economy econ) {
+    public TeleportSpawnCommand(Plugin plugin, ConfigEngine configEngine, Economy econ) {
+
+        super(plugin);
+
         this.configEngine = configEngine;
         this.econ = econ;
     }
@@ -110,34 +118,60 @@ public class TeleportSpawnCommand extends BaseTeleportCommand implements Command
 
                     }
 
-                    try {
+                    if(args.length > 0) {
 
-                        // We can't teleport a player from another thread, so the payment must be handled here.
-                        if (econ.has(player, teleportCost)) {
+                        TeleportRequest teleportRequest = takeTeleportRequest(args[0]);
 
-                            EconomyResponse response = econ.withdrawPlayer(player, teleportCost);
+                        if (teleportRequest != null) {
 
-                            if (response.transactionSuccess()) {
+                            try {
 
-                                teleportPlayer(player, destination);
+                                // We can't teleport a player from another thread, so the payment must be handled here.
+                                if (econ.has(player, teleportCost)) {
 
-                                SendMessage(player, "Your teleport request has been completed and " + econ.format(teleportCost) + " has been deducted from your balance.", ChatColor.GREEN);
+                                    EconomyResponse response = econ.withdrawPlayer(player, teleportCost);
+
+                                    if (response.transactionSuccess()) {
+
+                                        teleportPlayer(player, destination);
+
+                                        SendMessage(player, "Your teleport request has been completed and " + econ.format(teleportCost) + " has been deducted from your balance.", ChatColor.GREEN);
+
+                                    }
+
+                                } else {
+
+                                    SendMessage(player, "You don't have enough to cover the cost of that teleport! It will cost " + econ.format(teleportCost) + " and you only have " + econ.format(econ.getBalance(player)) + ".", ChatColor.RED);
+
+                                }
+
+                            } catch (Exception e) {
+
+                                e.printStackTrace();
+
+                                SendMessage(player, "Oops, something went wrong! Please contact an Op if you have been charged for this transaction but not teleported to home.", ChatColor.RED);
 
                             }
 
                         }
                         else {
 
-                            SendMessage(player, "You don't have enough to cover the cost of that teleport! It will cost " + econ.format(teleportCost) + " and you only have " + econ.format(econ.getBalance(player)) + ".", ChatColor.RED);
+                            SendMessage(player, "Your teleport request has expired, already been used or could not be found!", ChatColor.RED);
 
                         }
 
                     }
-                    catch (Exception e) {
+                    else {
 
-                        e.printStackTrace();
+                        ComponentBuilder confirmationRequest = new ComponentBuilder(ChatColor.AQUA + "This teleport will cost " + econ.format(teleportCost) + ". ");
 
-                        SendMessage( player, "Oops, something went wrong! Please contact an Op if you have been charged for this transaction but not teleported to home.", ChatColor.RED);
+                        TextComponent clickHere = new TextComponent( ChatColor.WHITE + "Click here" );
+                        clickHere.setClickEvent( new ClickEvent( ClickEvent.Action.RUN_COMMAND, "/bananosuite:spawn ACCEPTCOST" ) );
+                        clickHere.setUnderlined(true);
+
+                        confirmationRequest.append(clickHere);
+
+                        player.spigot().sendMessage(confirmationRequest.create());
 
                     }
 

@@ -117,18 +117,20 @@ public final class BananoSuitePlugin extends JavaPlugin {
 
         getCommand("donate").setExecutor(new DonateCommand(this.db, this.configEngine, this.econ));
         getCommand("rain").setExecutor(new RainCommand(this.configEngine, this.econ));
-        getCommand("teleport").setExecutor(new TeleportCommand(this.db, this.configEngine, this.econ));
-        getCommand("home").setExecutor(new TeleportHomeCommand(this.db, this.configEngine, this.econ));
-        getCommand("spawn").setExecutor(new TeleportSpawnCommand(this.configEngine, this.econ));
+        //getCommand("teleport").setExecutor(new TeleportCommand(this, this.db, this.configEngine, this.econ));
+        getCommand("home").setExecutor(new TeleportHomeCommand(this, this.db, this.configEngine, this.econ));
+        getCommand("spawn").setExecutor(new TeleportSpawnCommand(this, this.configEngine, this.econ));
         getCommand("deathinsurance").setExecutor(new DeathInsuranceCommand(this.configEngine, this.econ, this.db));
         getCommand("monkeymap").setExecutor(new MonKeyMapCommand(this, this.db, this.configEngine, econ));
+        getCommand("wild").setExecutor(new WildTeleportCommand(this, this.db, this.configEngine, econ));
 
         getCommand("rain").setTabCompleter(new RainTabCompleter());
         getCommand("deathinsurance").setTabCompleter(new DeathInsuranceCommandTabCompleter());
-        getCommand("teleport").setTabCompleter(new TeleportCommandTabCompleter());
+        //getCommand("teleport").setTabCompleter(new TeleportCommandTabCompleter());
         getCommand("home").setTabCompleter(new TeleportDirectCommandTabCompleter());
         getCommand("spawn").setTabCompleter(new TeleportDirectCommandTabCompleter());
         getCommand("monkeymap").setTabCompleter(new MonKeyMapTabCompleter(this.configEngine));
+        getCommand("wild").setTabCompleter(new WildTeleportTabCompleter());
 
         Bukkit.getPluginManager().registerEvents(new OnPlayerDeathEvent(this.db, this.configEngine, this.econ), this);
 
