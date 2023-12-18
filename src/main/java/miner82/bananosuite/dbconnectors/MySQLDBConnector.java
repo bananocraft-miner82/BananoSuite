@@ -14,7 +14,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -81,19 +80,20 @@ public class MySQLDBConnector extends BaseDBConnector {
         Connection connection = getConnection();
 
         String usersTable = "CREATE TABLE IF NOT EXISTS users (" +
-                            "    playerUUID     VARCHAR(75) NOT NULL UNIQUE," +
-                            "    name           VARCHAR(50) NOT NULL," +
-                            "    joined         TIMESTAMP NOT NULL," +
-                            "    deathinsurance VARCHAR(20) NOT NULL," +
-                            "    lastpolicyuse  TIMESTAMP NOT NULL," +
-                            "    pvpoptin       BOOLEAN NOT NULL DEFAULT FALSE," +
-                            "    playerrank     VARCHAR(20) NOT NULL," +
-                            "    shieldsup      BOOLEAN NOT NULL DEFAULT FALSE," +
-                            "    homeworldId    VARCHAR(50) NOT NULL, " +
-                            "    homeworldName  VARCHAR(50) NOT NULL, " +
-                            "    homex          INT NOT NULL, " +
-                            "    homey          INT NOT NULL, " +
-                            "    homez          INT NOT NULL" +
+                            "    playerUUID         VARCHAR(75) NOT NULL UNIQUE," +
+                            "    name               VARCHAR(50) NOT NULL," +
+                            "    joined             TIMESTAMP NOT NULL," +
+                            "    deathinsurance     VARCHAR(20) NOT NULL," +
+                            "    lastpolicyuse      TIMESTAMP NOT NULL," +
+                            "    pvpoptin           BOOLEAN NOT NULL DEFAULT FALSE," +
+                            "    playerrank         VARCHAR(20) NOT NULL," +
+                            "    shieldsup          BOOLEAN NOT NULL DEFAULT FALSE," +
+                            "    homeworldId        VARCHAR(50) NOT NULL, " +
+                            "    homeworldName      VARCHAR(50) NOT NULL, " +
+                            "    homex              INT NOT NULL, " +
+                            "    homey              INT NOT NULL, " +
+                            "    homez              INT NOT NULL," +
+                            "    wildteleportuses   INT NOT NULL" +
                             ")  ENGINE=INNODB";
 
         try {
@@ -200,7 +200,7 @@ public class MySQLDBConnector extends BaseDBConnector {
 
             // Query the database
 
-            PreparedStatement query = connection.prepareStatement("SELECT playerUUID, name, joined, deathinsurance, lastpolicyuse, pvpoptin, playerrank, shieldsup, homeworldid, homex, homey, homez " +
+            PreparedStatement query = connection.prepareStatement("SELECT playerUUID, name, joined, deathinsurance, lastpolicyuse, pvpoptin, playerrank, shieldsup, homeworldid, homex, homey, homez, wildteleportuses " +
                                                                       "FROM users " +
                                                                       "WHERE playerUUID = ?");
 
@@ -232,7 +232,8 @@ public class MySQLDBConnector extends BaseDBConnector {
                                                 new Location(world,
                                                               results.getInt("homex"),
                                                               results.getInt("homey"),
-                                                              results.getInt("homez")));
+                                                              results.getInt("homez")),
+                                                results.getInt("wildteleportuses"));
 
 
             }
@@ -297,8 +298,8 @@ public class MySQLDBConnector extends BaseDBConnector {
 
             UUID playerUUID = player.getUniqueId();
 
-            PreparedStatement insert = connection.prepareStatement("INSERT INTO users (playerUUID, name, joined, deathinsurance, lastpolicyuse, pvpoptin, playerrank, shieldsup, homeworldid, homeworldname, homex, homey, homez) " +
-                                                                       "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            PreparedStatement insert = connection.prepareStatement("INSERT INTO users (playerUUID, name, joined, deathinsurance, lastpolicyuse, pvpoptin, playerrank, shieldsup, homeworldid, homeworldname, homex, homey, homez, wildteleportuses) " +
+                                                                       "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)");
 
             //playerUUID, name, joined, deathinsurance, lastpolicyuse, pvpoptin, playerrank, shieldsup, homeworld, homex, homey, homez
             insert.setString(1, playerUUID.toString());
@@ -321,7 +322,7 @@ public class MySQLDBConnector extends BaseDBConnector {
 
             playerRecord = new PlayerRecord(playerUUID, player.getName(), LocalDateTime.now(),
                                                 DeathInsuranceOption.None, LocalDateTime.now(), false, PlayerRank.None,
-                                                false, player.getBedSpawnLocation());
+                                                false, player.getBedSpawnLocation(), 0);
 
             playerRecords.put(playerUUID, playerRecord);
 
@@ -393,7 +394,8 @@ public class MySQLDBConnector extends BaseDBConnector {
                                                                        "    homeworldname = ?, " +
                                                                        "    homex = ?, " +
                                                                        "    homey = ?, " +
-                                                                       "    homez = ? " +
+                                                                       "    homez = ?, " +
+                                                                       "    wildteleportuses = ? " +
                                                                        "WHERE playerUUID = ?");
 
             insert.setString(1, playerRecord.getDeathInsuranceOption().name());
@@ -406,7 +408,8 @@ public class MySQLDBConnector extends BaseDBConnector {
             insert.setInt(8, homeLocation.getBlockX());
             insert.setInt(9, homeLocation.getBlockY());
             insert.setInt(10, homeLocation.getBlockZ());
-            insert.setString(11, playerRecord.getUUID().toString());
+            insert.setInt(11, playerRecord.getWildTeleportUseCount());
+            insert.setString(12, playerRecord.getUUID().toString());
 
 
             result = insert.executeUpdate() > 0;

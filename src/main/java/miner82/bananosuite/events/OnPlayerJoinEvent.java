@@ -1,6 +1,5 @@
 package miner82.bananosuite.events;
 
-import miner82.bananosuite.configuration.ConfigEngine;
 import miner82.bananosuite.interfaces.IDBConnection;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;

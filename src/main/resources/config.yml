@@ -7,6 +7,7 @@
 #mysqlPassword: dbpassword
 
 EnableBananoSuite: true
+ShowDebug: true
 
 EnableDonateCommand: true
 EnableMonKeyMaps: true
@@ -32,6 +33,14 @@ EnableDeathInsurance: true
 DeathInsuranceBasePremium: 19
 DeathInsuranceMaximumPremium: 1900
 DeathInsuranceGrowthRate: 0.19
+
+# Wild Teleport Configuration
+MaximumWildTeleportRadius: 10000
+SpawnInBoatOnWater: true
+SpawnInBoatType: OAK
+MaxSearchXOnLava: 10
+MaximumWildTeleportUses: 3
+WildTeleportCosts: [0,1.9,6.9]
 
 # MonKey/QR Map Configuration
 monKeyImageSourceURL: https://monkey.banano.cc/api/v1/monkey/{address}?format=png&size=128&background=true
