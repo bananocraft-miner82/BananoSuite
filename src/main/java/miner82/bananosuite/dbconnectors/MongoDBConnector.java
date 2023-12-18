@@ -85,7 +85,14 @@ public class MongoDBConnector extends BaseDBConnector {
                 Location homeLocation = player.getBedSpawnLocation();
                 boolean shieldsUp = user.getBoolean("shieldsup");
                 PlayerRank playerRank = PlayerRank.None;
-                LocalDateTime joined = LocalDateTime.ofInstant(Instant.ofEpochMilli(user.getLong("joined")), ZoneOffset.UTC);
+                LocalDateTime joined = LocalDateTime.ofInstant(Instant.ofEpochMilli(tryGetLong(user, "joined")), ZoneOffset.UTC);
+                int wildTeleportUseCount = 0;
+
+                if(user.containsKey("wildusecount")) {
+
+                    wildTeleportUseCount = user.getInteger("wildusecount");
+
+                }
 
                 LocalDateTime lastDIUsage = LocalDateTime.now();
 
@@ -97,7 +104,7 @@ public class MongoDBConnector extends BaseDBConnector {
 
                 if(user.containsKey("lastdiuse")) {
 
-                    lastDIUsage = LocalDateTime.ofInstant(Instant.ofEpochMilli(user.getLong("lastdiuse")), ZoneOffset.UTC);
+                    lastDIUsage = LocalDateTime.ofInstant(Instant.ofEpochMilli(tryGetLong(user, "lastdiuse")), ZoneOffset.UTC);
 
                 }
 
@@ -139,7 +146,8 @@ public class MongoDBConnector extends BaseDBConnector {
                                                 pvpOptedIn,
                                                 playerRank,
                                                 shieldsUp,
-                                                homeLocation);
+                                                homeLocation,
+                                                wildTeleportUseCount);
 
             }
             catch (Exception e) {
@@ -188,7 +196,8 @@ public class MongoDBConnector extends BaseDBConnector {
                 .append("homeWorldName", spawnLocation.getWorld().getName())
                 .append("homeX", spawnLocation.getBlockX())
                 .append("homeY", spawnLocation.getBlockY())
-                .append("homeZ", spawnLocation.getBlockZ());
+                .append("homeZ", spawnLocation.getBlockZ())
+                .append("wildusecount", 0);
 
         db.getCollection("users").insertOne(document1);
 
@@ -200,7 +209,8 @@ public class MongoDBConnector extends BaseDBConnector {
                                                     player.isOp(),
                                                     PlayerRank.None,
                                                     false,
-                                                    spawnLocation);
+                                                    spawnLocation,
+                                                    0);
 
         if(!this.playerRecords.containsKey(playerUUID)) {
             this.playerRecords.put(playerUUID, playerRecord);
@@ -231,6 +241,7 @@ public class MongoDBConnector extends BaseDBConnector {
             updateFields.append("homeX", playerRecord.getHomeLocation().getBlockX());
             updateFields.append("homeY", playerRecord.getHomeLocation().getBlockY());
             updateFields.append("homeZ", playerRecord.getHomeLocation().getBlockZ());
+            updateFields.append("wildusecount", playerRecord.getWildTeleportUseCount());
 
             BasicDBObject setQuery = new BasicDBObject();
             setQuery.append("$set", updateFields);
@@ -402,6 +413,36 @@ public class MongoDBConnector extends BaseDBConnector {
         }
 
         return false;
+
+    }
+
+    private double tryGetDouble(Document fromDocument, String fieldName) {
+
+        try {
+
+            return fromDocument.getDouble(fieldName);
+
+        }
+        catch (ClassCastException ex) {
+
+            return  (double) fromDocument.getInteger(fieldName);
+
+        }
+
+    }
+
+    private long tryGetLong(Document fromDocument, String fieldName) {
+
+        try {
+
+            return fromDocument.getLong(fieldName);
+
+        }
+        catch (ClassCastException ex) {
+
+            return fromDocument.getDouble(fieldName).longValue();
+
+        }
 
     }
 

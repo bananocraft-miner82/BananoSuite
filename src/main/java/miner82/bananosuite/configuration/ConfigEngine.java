@@ -8,6 +8,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.io.File;
+import java.lang.Math;
 import java.util.*;
 
 public class ConfigEngine {
@@ -19,6 +20,7 @@ public class ConfigEngine {
     private HashMap<String,String> availableFrames = new HashMap<>();
 
     private boolean enablePlugin = true;
+    private boolean showDebug = true;
 
     private String mongoDbConnectionString = "";
     private DBConnectionType connectionType = DBConnectionType.Json;
@@ -65,12 +67,29 @@ public class ConfigEngine {
     private double monKeyPrice = 100;
     private double qrPrice = 250;
 
+    // Random wild teleport settings
+    private final int DEFAULT_MAX_SPAWN_RADIUS = 1000;
+    private int maximumTeleportRadius = DEFAULT_MAX_SPAWN_RADIUS;
+    private boolean wildTeleportInBoatOnWater = true;
+    private org.bukkit.entity.Boat.Type wildTeleportInBoatType = org.bukkit.entity.Boat.Type.OAK;
+    private int maxSearchXIfLavaWildTeleport = 10;
+    private int maximumWildTeleportUses = 3;
+    private double[] wildTeleportCosts = new double[this.maximumWildTeleportUses];
+
     public ConfigEngine(BananoSuitePlugin main) {
 
         this.main = main;
 
         initialiseConfig(main.getConfig());
 
+    }
+
+    public boolean getIsDebugMode() {
+        return this.showDebug;
+    }
+
+    public void setIsDebugMode(boolean showDebug) {
+        this.showDebug = showDebug;
     }
 
     public DBConnectionType getConnectionType() {
@@ -536,11 +555,106 @@ public class ConfigEngine {
         }
     }
 
+    public int getMaximumTeleportRadius() {
+        return this.maximumTeleportRadius;
+    }
+
+    public void setMaximumTeleportRadius(int newMaximumTeleportRadius) {
+
+        newMaximumTeleportRadius = Math.abs(newMaximumTeleportRadius);
+
+        if(this.maximumTeleportRadius != newMaximumTeleportRadius) {
+
+            this.maximumTeleportRadius = newMaximumTeleportRadius;
+
+            save();
+
+        }
+
+    }
+
+    public boolean isWildTeleportInBoatOnWater() {
+        return this.wildTeleportInBoatOnWater;
+    }
+
+    public void setWildTeleportInBoatOnWater(boolean giveBoat) {
+
+        if(this.wildTeleportInBoatOnWater != giveBoat) {
+
+            this.wildTeleportInBoatOnWater = giveBoat;
+
+            save();
+
+        }
+
+    }
+
+    public org.bukkit.entity.Boat.Type getWildTeleportInBoatType() {
+        return this.wildTeleportInBoatType;
+    }
+
+    public void setWildTeleportInBoatType(org.bukkit.entity.Boat.Type boatType) {
+
+        if(this.wildTeleportInBoatType != boatType) {
+
+            this.wildTeleportInBoatType = boatType;
+
+            save();
+
+        }
+
+    }
+
+    public int getMaxSearchXIfLavaWildTeleport() {
+        return this.maxSearchXIfLavaWildTeleport;
+    }
+
+    public void setMaxSearchXIfLavaWildTeleport(int maxDistance) {
+
+        if(this.maxSearchXIfLavaWildTeleport != maxDistance) {
+
+            this.maxSearchXIfLavaWildTeleport = maxDistance;
+
+            save();
+
+        }
+
+    }
+
+    public int getMaximumWildTeleportUses() {
+        return this.maximumWildTeleportUses;
+    }
+
+    public void setMaximumWildTeleportUses(int newValue) {
+
+        if(this.maximumWildTeleportUses != newValue) {
+
+            this.maximumWildTeleportUses = newValue;
+
+            save();
+
+        }
+
+    }
+
+    public double getWildTeleportCost(int attempt) {
+
+        if(this.wildTeleportCosts.length > attempt) {
+
+            return this.wildTeleportCosts[attempt];
+
+        }
+
+        return 0;
+
+    }
+
     public boolean save() {
 
         FileConfiguration config = this.main.getConfig();
 
         config.set("EnableBananoSuite", this.enablePlugin);
+        config.set("DebugMode", this.showDebug);
 
         config.set("EnableDonateCommand", this.donateCommandEnabled);
         config.set("EnableMonKeyMaps", this.monkeyMapsEnabled);
@@ -570,6 +684,21 @@ public class ConfigEngine {
         config.set("MonKeyPrice", this.monKeyPrice);
         config.set("QRPrice", this.qrPrice);
 
+        config.set("MaximumWildTeleportRadius", this.maximumTeleportRadius);
+        config.set("SpawnInBoatOnWater", this.wildTeleportInBoatOnWater);
+        config.set("SpawnInBoatType", this.wildTeleportInBoatType.name());
+        config.set("MaxSearchXOnLava", this.maxSearchXIfLavaWildTeleport);
+        config.set("MaximumWildTeleportUses", this.maximumWildTeleportUses);
+
+        List<String> teleportCosts = new ArrayList<>();
+
+        for (double cost : this.wildTeleportCosts) {
+
+            teleportCosts.add(String.valueOf(cost));
+
+        }
+
+        config.set("WildTeleportCosts", teleportCosts);
 
         this.main.saveConfig();
 
@@ -601,6 +730,8 @@ public class ConfigEngine {
             }
 
             setIsEnabled(true);
+            this.showDebug = configuration.getBoolean("ShowDebug");
+            System.out.println("Debug Mode enabled: " + this.showDebug);
 
             if(configuration.contains("mongoURI")
                     && configuration.getString("mongoURI").length() > 0) {
@@ -723,6 +854,136 @@ public class ConfigEngine {
 
             loadDonationPrizes();
             loadFrames();
+
+            this.maximumTeleportRadius = configuration.getInt("MaximumWildTeleportRadius");
+            System.out.println("Maximum Wild Teleport Radius: " + this.maximumTeleportRadius);
+
+            if(configuration.contains("MaximumWildTeleportRadius")) {
+
+                try {
+
+                    this.maximumTeleportRadius = configuration.getInt("MaximumWildTeleportRadius");
+
+                }
+                catch (Exception ex) {
+
+                    System.out.println("Invalid MaximumWildTeleportRadius value... using default instead.");
+
+                }
+
+            }
+
+            System.out.println("- Maximum wild teleport location radius from world spawn set: " + this.maximumTeleportRadius);
+
+            if(configuration.contains("SpawnInBoatOnWater")) {
+
+                try {
+
+                    this.wildTeleportInBoatOnWater = configuration.getBoolean("SpawnInBoatOnWater");
+
+                }
+                catch (Exception ex) {
+
+                    System.out.println("Invalid SpawnInBoatOnWater value... using default instead.");
+
+                }
+
+            }
+
+            System.out.println("- Player will wild teleport in a boat if on water: " + this.wildTeleportInBoatOnWater);
+
+            if(configuration.contains("SpawnInBoatType")) {
+
+                try {
+
+                    this.wildTeleportInBoatType = org.bukkit.entity.Boat.Type.valueOf(configuration.getString("SpawnInBoatType"));
+
+                }
+                catch (Exception ex) {
+
+                    System.out.println("Invalid SpawnInBoatType value... using default instead.");
+
+                }
+
+            }
+
+            System.out.println("- Player will wild teleport with boat type if on water: " + this.wildTeleportInBoatType.name());
+
+            if(configuration.contains("MaxSearchXOnLava")) {
+
+                try {
+
+                    this.maxSearchXIfLavaWildTeleport = configuration.getInt("MaxSearchXOnLava");
+
+                }
+                catch (Exception ex) {
+
+                    System.out.println("Invalid MaxSearchXOnLava value... using default instead.");
+
+                }
+
+            }
+
+            System.out.println("- Maximum distance to search for safety if wild teleport on lava set: " + this.maxSearchXIfLavaWildTeleport);
+
+            if(configuration.contains("MaximumWildTeleportUses")) {
+
+                try {
+
+                    this.maximumWildTeleportUses = configuration.getInt("MaximumWildTeleportUses");
+
+                }
+                catch (Exception ex) {
+
+                    System.out.println("Invalid MaximumWildTeleportUses value... using default instead.");
+
+                }
+
+            }
+
+            System.out.println("- Maximum number of wild teleport uses set: " + this.maximumWildTeleportUses);
+
+            if(configuration.contains("WildTeleportCosts")) {
+
+                try {
+
+                    this.wildTeleportCosts = new double[this.maximumWildTeleportUses];
+
+                    List<String> costs = configuration.getStringList("WildTeleportCosts");
+                    int index = 0;
+
+                    for(String cost : costs) {
+
+                        if(this.wildTeleportCosts.length > index) {
+
+                            try {
+
+                                this.wildTeleportCosts[index] = Double.parseDouble(cost);
+
+                            }
+                            catch (Exception ex) {
+
+                                System.out.println("Invalid wild teleport cost: " + cost);
+
+                            }
+
+                            index++;
+
+                        }
+
+                    }
+
+
+                }
+                catch (Exception ex) {
+
+                    System.out.println("Invalid WildTeleportCosts value... using default instead.");
+
+                }
+
+            }
+
+            System.out.println("- Wild teleport costs set: " + this.wildTeleportCosts.toString());
 
         }
         else {
