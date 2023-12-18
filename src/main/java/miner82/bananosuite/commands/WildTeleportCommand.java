@@ -61,7 +61,7 @@ public class WildTeleportCommand extends BaseTeleportCommand implements CommandE
                         SendMessage(player, "A wild teleport will teleport you to a random location up to "
                                                 + this.configEngine.getMaximumTeleportRadius() + " blocks from the world spawn location. "
                                                 + "You can use the /wild command up to " + this.configEngine.getMaximumWildTeleportUses() + " times "
-                                                + " and have already used the command " + playerRecord.getWildTeleportUseCount() + " times.", ChatColor.AQUA);
+                                                + "and have already used the command " + playerRecord.getWildTeleportUseCount() + " times.", ChatColor.AQUA);
 
                         String message = "The cost for each use will be: ";
 

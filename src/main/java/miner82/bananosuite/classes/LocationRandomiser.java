@@ -24,7 +24,20 @@ public class LocationRandomiser {
 
     public Location calculateRandomLocation(Player forPlayer) {
 
-        if(forPlayer == null) {
+        if(forPlayer != null) {
+
+            return calculateRandomLocation(forPlayer, forPlayer.getWorld().getSpawnLocation().clone());
+
+        }
+
+        return null;
+
+    }
+
+    public Location calculateRandomLocation(Player forPlayer, Location aroundSourceLocation) {
+
+        if(forPlayer == null
+             || aroundSourceLocation == null) {
 
             return null;
 
@@ -32,6 +45,12 @@ public class LocationRandomiser {
 
         World world = forPlayer.getWorld();
         Location location = world.getSpawnLocation().clone();
+
+        if(aroundSourceLocation != null) {
+
+            location = aroundSourceLocation.clone();
+
+        }
 
         if(this.configEngine.getIsDebugMode()) {
 

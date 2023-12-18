@@ -85,16 +85,13 @@ public class MongoDBConnector extends BaseDBConnector {
                 Location homeLocation = player.getBedSpawnLocation();
                 boolean shieldsUp = user.getBoolean("shieldsup");
                 PlayerRank playerRank = PlayerRank.None;
-                LocalDateTime joined = LocalDateTime.ofInstant(Instant.ofEpochMilli(user.getLong("joined")), ZoneOffset.UTC);
+                LocalDateTime joined = LocalDateTime.ofInstant(Instant.ofEpochMilli(tryGetLong(user, "joined")), ZoneOffset.UTC);
                 int wildTeleportUseCount = 0;
 
                 if(user.containsKey("wildusecount")) {
 
-                    System.out.println("Pre-load wildTeleportUseCount: " + wildTeleportUseCount);
                     wildTeleportUseCount = user.getInteger("wildusecount");
 
-                    System.out.println(user.getInteger("wildusecount"));
-                    System.out.println("Post-load wildTeleportUseCount" + wildTeleportUseCount);
                 }
 
                 LocalDateTime lastDIUsage = LocalDateTime.now();
@@ -107,7 +104,7 @@ public class MongoDBConnector extends BaseDBConnector {
 
                 if(user.containsKey("lastdiuse")) {
 
-                    lastDIUsage = LocalDateTime.ofInstant(Instant.ofEpochMilli(user.getLong("lastdiuse")), ZoneOffset.UTC);
+                    lastDIUsage = LocalDateTime.ofInstant(Instant.ofEpochMilli(tryGetLong(user, "lastdiuse")), ZoneOffset.UTC);
 
                 }
 
@@ -416,6 +413,36 @@ public class MongoDBConnector extends BaseDBConnector {
         }
 
         return false;
+
+    }
+
+    private double tryGetDouble(Document fromDocument, String fieldName) {
+
+        try {
+
+            return fromDocument.getDouble(fieldName);
+
+        }
+        catch (ClassCastException ex) {
+
+            return  (double) fromDocument.getInteger(fieldName);
+
+        }
+
+    }
+
+    private long tryGetLong(Document fromDocument, String fieldName) {
+
+        try {
+
+            return fromDocument.getLong(fieldName);
+
+        }
+        catch (ClassCastException ex) {
+
+            return fromDocument.getDouble(fieldName).longValue();
+
+        }
 
     }
 
